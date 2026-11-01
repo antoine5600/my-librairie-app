@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { ContactShadows } from '@react-three/drei'
+import { RoundedBox, ContactShadows, OrbitControls } from '@react-three/drei'
 import Livre3D from './Livre3D'
 import type { Book3D } from './types'
 
@@ -39,12 +39,12 @@ const SAMPLE_BOOKS: Book3D[] = [
   { id: '29', title: 'Le Vieil Homme et la Mer', author: 'Ernest Hemingway', thickness: 0.4, height: 1.7, coverColor: '#6f9fbf', shelf: 3, order: 2 },
   { id: '30', title: 'Autant en emporte le vent', author: 'Margaret Mitchell', thickness: 1.0, height: 2.3, coverColor: '#bf8f6f', shelf: 3, order: 3 },
   { id: '31', title: 'Les Hauts de Hurlevent', author: 'Emily Brontë', thickness: 0.6, height: 2.0, coverColor: '#5f7f7f', shelf: 3, order: 4 },
-  { id: '32', title: 'Tess d\'Urberville', author: 'Thomas Hardy', thickness: 0.7, height: 2.1, coverColor: '#8f8f5f', shelf: 3, order: 5 },
+  { id: '32', title: "Tess d'Urberville", author: 'Thomas Hardy', thickness: 0.7, height: 2.1, coverColor: '#8f8f5f', shelf: 3, order: 5 },
   { id: '33', title: 'Le Parfum', author: 'Patrick Süskind', thickness: 0.5, height: 2.0, coverColor: '#5f5f3f', shelf: 3, order: 6 },
   { id: '34', title: 'Le Pendule de Foucault', author: 'Umberto Eco', thickness: 0.7, height: 2.2, coverColor: '#5f3f2f', shelf: 3, order: 7 },
 ]
 
-// ---------- Paramètres bibliothèque (proportions Tiny Bookshop) ----------
+// ---------- Paramètres bibliothèque ----------
 const SHELF_COUNT = 4
 const SHELF_HEIGHTS = [2.5, 2.5, 2.6, 2.4]
 const SHELF_THICKNESS = 0.15
@@ -52,7 +52,7 @@ const SHELF_WIDTH = 7.0
 const SHELF_DEPTH = 1.6
 const CABINET_HEIGHT = SHELF_HEIGHTS.reduce((a, b) => a + b, 0) + SHELF_THICKNESS * (SHELF_COUNT + 1)
 const CABINET_DEPTH = SHELF_DEPTH + 0.25
-const GAP = 0.08 // livres plus serrés
+const GAP = 0.08
 
 function shelfBottomY(index: number): number {
   let y = 0
@@ -74,12 +74,10 @@ function Sol() {
 function Mur() {
   return (
     <group>
-      {/* Mur principal */}
       <mesh position={[0, CABINET_HEIGHT / 2, -CABINET_DEPTH / 2 - 0.3]} receiveShadow>
         <planeGeometry args={[14, CABINET_HEIGHT + 2]} />
         <meshStandardMaterial color="#f0e6d3" roughness={0.6} />
       </mesh>
-      {/* Moulure/hauteur de mur plus basse */}
       <mesh position={[0, CABINET_HEIGHT + 1, -CABINET_DEPTH / 2 - 0.3]}>
         <planeGeometry args={[14, 0.08]} />
         <meshStandardMaterial color="#d4c4a8" roughness={0.5} />
@@ -89,20 +87,16 @@ function Mur() {
 }
 
 function Plante() {
-  // Petit pot avec plante — déco dessus de bibliothèque
   return (
     <group position={[-SHELF_WIDTH / 2 - 0.15, CABINET_HEIGHT + 0.1, 0.3]}>
-      {/* Pot */}
       <mesh position={[0, 0.3, 0]} castShadow>
         <cylinderGeometry args={[0.2, 0.35, 0.4, 12]} />
         <meshStandardMaterial color="#c0734f" roughness={0.8} />
       </mesh>
-      {/* Tige */}
       <mesh position={[0, 0.6, 0]}>
         <cylinderGeometry args={[0.04, 0.04, 0.3, 6]} />
         <meshStandardMaterial color="#5d7a3f" />
       </mesh>
-      {/* Feuillage */}
       <mesh position={[0, 0.8, 0]}>
         <sphereGeometry args={[0.25, 8, 8]} />
         <meshStandardMaterial color="#6d9a5f" roughness={0.9} />
@@ -116,7 +110,6 @@ function Plante() {
 }
 
 function Boussole() {
-  // Petit bibelot déco sur le dessus
   return (
     <group position={[SHELF_WIDTH / 2 + 0.15, CABINET_HEIGHT + 0.15, 0.3]}>
       <mesh castShadow>
@@ -132,46 +125,43 @@ function Boussole() {
 }
 
 function CadreBibliotheque() {
-  const woodColor = '#b77e68' // bois chaud (dominante image)
+  const woodColor = '#b77e68'
   const woodDark = '#8b6048'
-  const frameThickness = 0.18
-  const backInset = -CABINET_DEPTH / 2 + 0.06
+  const ft = 0.18
+  const r = 0.14 // rayon d'arrondi des coins
 
   return (
     <group>
-      {/* Panneau arrière — bois clair */}
-      <mesh position={[0, CABINET_HEIGHT / 2, backInset]} receiveShadow>
+      {/* Panneau arrière */}
+      <mesh position={[0, CABINET_HEIGHT / 2, -CABINET_DEPTH / 2 + 0.06]} receiveShadow>
         <boxGeometry args={[SHELF_WIDTH + 0.3, CABINET_HEIGHT, 0.04]} />
         <meshStandardMaterial color="#c4a882" roughness={0.9} />
       </mesh>
 
-      {/* Côté gauche */}
-      <mesh position={[-SHELF_WIDTH / 2 - frameThickness / 2, CABINET_HEIGHT / 2, 0]} castShadow>
-        <boxGeometry args={[frameThickness, CABINET_HEIGHT, CABINET_DEPTH]} />
+      {/* Côté gauche — arrondi */}
+      <RoundedBox args={[ft, CABINET_HEIGHT, CABINET_DEPTH]} radius={r} position={[-SHELF_WIDTH / 2 - ft / 2, CABINET_HEIGHT / 2, 0]} castShadow>
         <meshStandardMaterial color={woodColor} roughness={0.7} />
-      </mesh>
+      </RoundedBox>
 
-      {/* Côté droit */}
-      <mesh position={[SHELF_WIDTH / 2 + frameThickness / 2, CABINET_HEIGHT / 2, 0]} castShadow>
-        <boxGeometry args={[frameThickness, CABINET_HEIGHT, CABINET_DEPTH]} />
+      {/* Côté droit — arrondi */}
+      <RoundedBox args={[ft, CABINET_HEIGHT, CABINET_DEPTH]} radius={r} position={[SHELF_WIDTH / 2 + ft / 2, CABINET_HEIGHT / 2, 0]} castShadow>
         <meshStandardMaterial color={woodColor} roughness={0.7} />
-      </mesh>
+      </RoundedBox>
 
-      {/* Dessus — avec rebord décoratif */}
-      <mesh position={[0, CABINET_HEIGHT + frameThickness / 2, 0]} castShadow>
-        <boxGeometry args={[SHELF_WIDTH + 0.5, frameThickness, CABINET_DEPTH + 0.15]} />
+      {/* Dessus — arrondi */}
+      <RoundedBox args={[SHELF_WIDTH + 0.5, ft, CABINET_DEPTH + 0.15]} radius={r} position={[0, CABINET_HEIGHT + ft / 2, 0]} castShadow>
         <meshStandardMaterial color={woodDark} roughness={0.6} />
-      </mesh>
+      </RoundedBox>
 
       {/* Dessous */}
-      <mesh position={[0, -frameThickness / 2, 0]}>
-        <boxGeometry args={[SHELF_WIDTH + 0.5, frameThickness, CABINET_DEPTH + 0.15]} />
+      <mesh position={[0, -ft / 2, 0]}>
+        <boxGeometry args={[SHELF_WIDTH + 0.5, ft, CABINET_DEPTH + 0.15]} />
         <meshStandardMaterial color={woodDark} roughness={0.6} />
       </mesh>
 
-      {/* Pieds avant décoratifs */}
+      {/* Pieds avant */}
       {[-1, 1].map(side => (
-        <mesh key={`pied-${side}`} position={[side * (SHELF_WIDTH / 2 - 0.3), -frameThickness / 2 - 0.25, CABINET_DEPTH / 2 - 0.05]}>
+        <mesh key={`pied-${side}`} position={[side * (SHELF_WIDTH / 2 - 0.3), -ft / 2 - 0.25, CABINET_DEPTH / 2 - 0.05]}>
           <cylinderGeometry args={[0.04, 0.06, 0.3, 8]} />
           <meshStandardMaterial color={woodDark} roughness={0.7} />
         </mesh>
@@ -182,6 +172,7 @@ function CadreBibliotheque() {
 
 function Etageres() {
   const woodColor = '#c48f6f'
+  const r = 0.06 // petit arrondi pour les étagères
   const positions: number[] = []
   for (let i = 0; i <= SHELF_COUNT; i++) {
     if (i === 0) positions.push(-SHELF_THICKNESS / 2)
@@ -192,10 +183,9 @@ function Etageres() {
   return (
     <group>
       {positions.map((y, i) => (
-        <mesh key={i} position={[0, y, 0]} receiveShadow castShadow>
-          <boxGeometry args={[SHELF_WIDTH, SHELF_THICKNESS, SHELF_DEPTH]} />
+        <RoundedBox key={i} args={[SHELF_WIDTH, SHELF_THICKNESS, SHELF_DEPTH]} radius={r} position={[0, y, 0]} receiveShadow castShadow>
           <meshStandardMaterial color={woodColor} roughness={0.8} />
-        </mesh>
+        </RoundedBox>
       ))}
     </group>
   )
@@ -216,12 +206,8 @@ function Livres({ books, onSelectBook, selectedId }: {
         let cursorX = -SHELF_WIDTH / 2 + 0.25
         const baseY = shelfBottomY(shelfIndex) + SHELF_THICKNESS + 0.04
 
-        // Petite variation aléatoire sur la profondeur pour un look naturel
-        let depthOffset = 0
-
         return sorted.map((book) => {
-          // Certains livres sont légèrement en retrait ou avancés
-          depthOffset = (Math.sin(book.order * 2.7) * 0.08)
+          const depthOffset = (Math.sin(book.order * 2.7) * 0.08)
           const x = cursorX + book.thickness / 2
           const pos: [number, number, number] = [x, baseY, depthOffset]
           cursorX += book.thickness + GAP
@@ -266,7 +252,6 @@ export default function BibliothequeScene({ className }: { className?: string })
         gl={{ antialias: true }}
         onPointerMissed={() => { setSelectedId(null); setSelectedBook(null) }}
       >
-        {/* Lumières — chaudes et douces (style Tiny Bookshop) */}
         <ambientLight intensity={0.25} color="#ffe4c4" />
         <directionalLight
           position={[2, 6, 4]}
@@ -299,15 +284,21 @@ export default function BibliothequeScene({ className }: { className?: string })
           selectedId={selectedId}
         />
 
-        <ContactShadows
-          position={[0, -0.04, 0]}
-          opacity={0.35}
-          scale={10}
-          blur={2.5}
+        <ContactShadows position={[0, -0.04, 0]} opacity={0.35} scale={10} blur={2.5} />
+
+        {/* ZOOM uniquement — pas de rotation ni déplacement */}
+        <OrbitControls
+          enableRotate={false}
+          enablePan={false}
+          enableZoom
+          enableDamping
+          dampingFactor={0.1}
+          minDistance={4}
+          maxDistance={18}
+          target={[0, CABINET_HEIGHT / 2, 0]}
         />
       </Canvas>
 
-      {/* Info du livre sélectionné — style popup Tiny Bookshop */}
       {selectedBook && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-amber-900/85 text-white rounded-xl px-5 py-2.5 shadow-xl border border-amber-700 max-w-sm text-center backdrop-blur-sm">
           <p className="font-bold text-sm tracking-tight">{selectedBook.title}</p>
