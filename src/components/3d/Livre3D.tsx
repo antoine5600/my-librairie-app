@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Vector3 } from 'three'
-import { Html } from '@react-three/drei'
+import { Text, Html } from '@react-three/drei'
 import { ThreeEvent } from '@react-three/fiber'
 
 interface Livre3DProps {
@@ -18,9 +18,6 @@ interface Livre3DProps {
   selected?: boolean
 }
 
-/**
- * Assombrit une couleur hex pour créer la tranche
- */
 function darken(hex: string, amount: number): string {
   const r = Math.max(0, parseInt(hex.slice(1, 3), 16) - amount)
   const g = Math.max(0, parseInt(hex.slice(3, 5), 16) - amount)
@@ -33,6 +30,17 @@ function lighten(hex: string, amount: number): string {
   const g = Math.min(255, parseInt(hex.slice(3, 5), 16) + amount)
   const b = Math.min(255, parseInt(hex.slice(5, 7), 16) + amount)
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+}
+
+/** Tronque le titre pour qu'il tienne sur le dos du livre */
+function shortTitle(title: string, maxLen: number = 14): string {
+  if (title.length <= maxLen) return title
+  return title.slice(0, maxLen - 1) + '…'
+}
+
+/** Calcule la taille de police max qui tient dans l'épaisseur du livre */
+function fontSizeFor(thickness: number): number {
+  return Math.max(0.08, Math.min(thickness * 0.35, 0.25))
 }
 
 export default function Livre3D({
@@ -54,9 +62,10 @@ export default function Livre3D({
     if (onSelect && id) onSelect(id)
   }
 
-  const edgeColor = darken(color, 35)    // tranche foncée
-  const topColor = lighten(color, 20)    // tranche supérieure plus claire
-  const stripColor = darken(color, 60)   // filet décoratif
+  const edgeColor = darken(color, 35)
+  const topColor = lighten(color, 20)
+  const fs = fontSizeFor(thickness)
+  const label = shortTitle(title)
 
   return (
     <group
@@ -74,7 +83,7 @@ export default function Livre3D({
         />
       </mesh>
 
-      {/* Tranche supérieure (dessus du livre) — colorée */}
+      {/* Tranche supérieure (dessus) — colorée */}
       <mesh position={[0, height, 0]} receiveShadow>
         <boxGeometry args={[thickness, 0.02, depth]} />
         <meshStandardMaterial color={topColor} roughness={0.7} />
@@ -86,15 +95,47 @@ export default function Livre3D({
         <meshStandardMaterial color={edgeColor} roughness={0.8} />
       </mesh>
 
-      {/* Filet décoratif doré sur le dos — style reliure */}
+      {/* Filet décoratif doré haut */}
       <mesh position={[0, height * 0.15, depth / 2 + 0.02]}>
         <planeGeometry args={[thickness - 0.1, 0.04]} />
         <meshBasicMaterial color="#c4a050" />
       </mesh>
+
+      {/* Filet décoratif doré bas */}
       <mesh position={[0, height * 0.85, depth / 2 + 0.02]}>
         <planeGeometry args={[thickness - 0.1, 0.04]} />
         <meshBasicMaterial color="#c4a050" />
       </mesh>
+
+      {/* Titre sur le dos du livre — texte 3D */}
+      {label.length > 0 && (
+        <Text
+          position={[0, height * 0.55, depth / 2 + 0.03]}
+          fontSize={fs}
+          color="#f5e6c8"
+          anchorX="center"
+          anchorY="middle"
+          maxWidth={thickness * 1.8}
+          letterSpacing={0.05}
+        >
+          {label}
+        </Text>
+      )}
+
+      {/* Auteur (petit, en bas) */}
+      {author.length > 0 && (
+        <Text
+          position={[0, height * 0.25, depth / 2 + 0.03]}
+          fontSize={fs * 0.6}
+          color="#d4c8a8"
+          anchorX="center"
+          anchorY="middle"
+          maxWidth={thickness * 1.5}
+          letterSpacing={0.02}
+        >
+          {author.length > 8 ? author.slice(0, 7) + '…' : author}
+        </Text>
+      )}
 
       {/* Effet de surbrillance au hover */}
       {hovered && (

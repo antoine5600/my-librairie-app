@@ -74,13 +74,14 @@ function Sol() {
 function Mur() {
   return (
     <group>
+      {/* Fond bleu clair */}
       <mesh position={[0, CABINET_HEIGHT / 2, -CABINET_DEPTH / 2 - 0.3]} receiveShadow>
         <planeGeometry args={[14, CABINET_HEIGHT + 2]} />
-        <meshStandardMaterial color="#f0e6d3" roughness={0.6} />
+        <meshStandardMaterial color="#d4e8f0" roughness={0.6} />
       </mesh>
       <mesh position={[0, CABINET_HEIGHT + 1, -CABINET_DEPTH / 2 - 0.3]}>
         <planeGeometry args={[14, 0.08]} />
-        <meshStandardMaterial color="#d4c4a8" roughness={0.5} />
+        <meshStandardMaterial color="#b8d0e0" roughness={0.5} />
       </mesh>
     </group>
   )
@@ -172,13 +173,14 @@ function CadreBibliotheque() {
 
 function Etageres() {
   const woodColor = '#c48f6f'
-  const r = 0.06 // petit arrondi pour les étagères
+  const r = 0.06
+  // Positions corrigées : chaque planche est SOUS le compartiment qu'elle supporte
   const positions: number[] = []
-  for (let i = 0; i <= SHELF_COUNT; i++) {
-    if (i === 0) positions.push(-SHELF_THICKNESS / 2)
-    else if (i === SHELF_COUNT) positions.push(shelfBottomY(SHELF_COUNT) + SHELF_HEIGHTS[SHELF_COUNT - 1] + SHELF_THICKNESS / 2)
-    else positions.push(shelfBottomY(i) + SHELF_HEIGHTS[i - 1] + SHELF_THICKNESS / 2)
+  positions.push(SHELF_THICKNESS / 2)                            // planche du bas
+  for (let i = 1; i < SHELF_COUNT; i++) {
+    positions.push(shelfBottomY(i) - SHELF_THICKNESS / 2)        // planches intermédiaires
   }
+  positions.push(CABINET_HEIGHT - SHELF_THICKNESS / 2)           // planche du haut
 
   return (
     <group>
