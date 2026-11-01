@@ -38,9 +38,22 @@ function shortTitle(title: string, maxLen: number = 14): string {
   return title.slice(0, maxLen - 1) + '…'
 }
 
-/** Calcule la taille de police max qui tient dans l'épaisseur du livre */
+/** Taille de police de l'auteur (horizontal, bas du dos) */
 function fontSizeFor(thickness: number): number {
   return Math.max(0.08, Math.min(thickness * 0.35, 0.25))
+}
+
+/** Taille de police du titre vertical : limitée par l'épaisseur du dos */
+function titleFontSize(thickness: number): number {
+  return Math.max(0.09, Math.min(thickness * 0.55, 0.3))
+}
+
+/** Nombre max de caractères pour que le titre vertical tienne dans la hauteur du livre */
+function titleMaxChars(title: string, height: number, fontSize: number): number {
+  const available = height * 0.72 // espace vertical réservé au titre
+  const max = Math.floor(available / (fontSize * 0.62))
+  if (title.length <= max) return title.length
+  return max
 }
 
 export default function Livre3D({
@@ -64,8 +77,10 @@ export default function Livre3D({
 
   const edgeColor = darken(color, 35)
   const topColor = lighten(color, 20)
-  const fs = fontSizeFor(thickness)
-  const label = shortTitle(title)
+  const fs = fontSizeFor(thickness)          // taille police auteur
+  const ts = titleFontSize(thickness)         // taille police titre (vertical)
+  const maxTitleChars = titleMaxChars(title, height, ts)
+  const label = shortTitle(title, maxTitleChars)
 
   return (
     <group
@@ -107,15 +122,17 @@ export default function Livre3D({
         <meshBasicMaterial color="#c4a050" />
       </mesh>
 
-      {/* Titre sur le dos du livre — texte 3D */}
+      {/* Titre sur le dos — écrit de haut en bas (vertical), adapté à la hauteur du livre */}
       {label.length > 0 && (
         <Text
-          position={[0, height * 0.55, depth / 2 + 0.03]}
-          fontSize={fs}
+          position={[0, height * 0.62, depth / 2 + 0.03]}
+          rotation={[0, 0, -Math.PI / 2]}
+          fontSize={ts}
           color="#f5e6c8"
           anchorX="center"
           anchorY="middle"
-          maxWidth={thickness * 1.8}
+          maxWidth={height * 0.75}
+          whiteSpace="nowrap"
           letterSpacing={0.05}
         >
           {label}
