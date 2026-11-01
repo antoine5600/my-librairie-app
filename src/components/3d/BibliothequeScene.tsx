@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { RoundedBox, ContactShadows, OrbitControls } from '@react-three/drei'
+import { RoundedBox, OrbitControls } from '@react-three/drei'
 import Livre3D from './Livre3D'
 import type { Book3D } from './types'
 import { genreColor } from './genres'
@@ -63,28 +63,12 @@ function shelfBottomY(index: number): number {
 
 // ---------- Composants ----------
 
-function Sol() {
-  return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]} receiveShadow>
-      <planeGeometry args={[14, 14]} />
-      <meshStandardMaterial color="#8b7355" roughness={1.0} />
-    </mesh>
-  )
-}
-
 function Mur() {
   return (
-    <group>
-      {/* Fond bleu clair */}
-      <mesh position={[0, CABINET_HEIGHT / 2, -CABINET_DEPTH / 2 - 0.3]} receiveShadow>
-        <planeGeometry args={[14, CABINET_HEIGHT + 2]} />
-        <meshStandardMaterial color="#d4e8f0" roughness={0.6} />
-      </mesh>
-      <mesh position={[0, CABINET_HEIGHT + 1, -CABINET_DEPTH / 2 - 0.3]}>
-        <planeGeometry args={[14, 0.08]} />
-        <meshStandardMaterial color="#b8d0e0" roughness={0.5} />
-      </mesh>
-    </group>
+    <mesh position={[0, CABINET_HEIGHT / 2, -CABINET_DEPTH / 2 - 0.3]}>
+      <planeGeometry args={[14, CABINET_HEIGHT + 2]} />
+      <meshStandardMaterial color="#4f5a73" roughness={0.6} />
+    </mesh>
   )
 }
 
@@ -275,7 +259,6 @@ export default function BibliothequeScene({ className }: { className?: string })
           color="#ffccaa"
         />
 
-        <Sol />
         <Mur />
         <Plante />
         <Boussole />
@@ -287,9 +270,7 @@ export default function BibliothequeScene({ className }: { className?: string })
           selectedId={selectedId}
         />
 
-        <ContactShadows position={[0, -0.04, 0]} opacity={0.35} scale={10} blur={2.5} />
-
-        {/* ZOOM uniquement — pas de rotation ni déplacement */}
+        {/* ZOOM uniquement */}
         <OrbitControls
           enableRotate={false}
           enablePan={false}
