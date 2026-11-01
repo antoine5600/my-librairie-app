@@ -50,7 +50,7 @@ function titleFontSize(thickness: number): number {
 
 /** Nombre max de caractères pour que le titre vertical tienne dans la hauteur du livre */
 function titleMaxChars(title: string, height: number, fontSize: number): number {
-  const available = height * 0.72 // espace vertical réservé au titre
+  const available = height * 0.65 // espace vertical entre les deux filets (0.15-0.85)
   const max = Math.floor(available / (fontSize * 0.62))
   if (title.length <= max) return title.length
   return max
@@ -122,16 +122,16 @@ export default function Livre3D({
         <meshBasicMaterial color="#c4a050" />
       </mesh>
 
-      {/* Titre sur le dos — écrit de haut en bas (vertical), adapté à la hauteur du livre */}
+      {/* Titre — entre les 2 filets dorés, écrit de haut en bas */}
       {label.length > 0 && (
         <Text
-          position={[0, height * 0.62, depth / 2 + 0.03]}
+          position={[0, height * 0.5, depth / 2 + 0.03]}
           rotation={[0, 0, -Math.PI / 2]}
           fontSize={ts}
           color="#f5e6c8"
           anchorX="center"
           anchorY="middle"
-          maxWidth={height * 0.75}
+          maxWidth={height * 0.68}
           whiteSpace="nowrap"
           letterSpacing={0.05}
         >
@@ -139,10 +139,10 @@ export default function Livre3D({
         </Text>
       )}
 
-      {/* Auteur (petit, en bas) */}
+      {/* Auteur — sous le filet doré, en bas du livre */}
       {author.length > 0 && (
         <Text
-          position={[0, height * 0.25, depth / 2 + 0.03]}
+          position={[0, height * 0.08, depth / 2 + 0.03]}
           fontSize={fs * 0.6}
           color="#d4c8a8"
           anchorX="center"
