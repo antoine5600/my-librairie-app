@@ -239,6 +239,7 @@ export default function BibliothequeScene({ className }: { className?: string })
         gl={{ antialias: true }}
         onPointerMissed={() => { setSelectedId(null); setSelectedBook(null) }}
       >
+        <color attach="background" args={['#4f5a73']} />
         <ambientLight intensity={0.25} color="#ffe4c4" />
         <directionalLight
           position={[2, 6, 4]}
