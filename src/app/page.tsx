@@ -9,21 +9,21 @@ const BibliothequeScene = dynamic(
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col h-screen bg-[#4f5a73]">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-slate-800 bg-slate-950/50 backdrop-blur-sm">
-        <h1 className="text-lg font-bold text-white tracking-tight">
+      <header className="flex items-center justify-between px-6 py-3 bg-[#4f5a73]/80 border-b border-[#3d4760] text-white">
+        <h1 className="text-lg font-bold tracking-tight">
           📚 My Librairie App
         </h1>
-        <div className="flex items-center gap-3 text-sm text-slate-400">
-          <span>🖱️ Cliquer un livre pour le sélectionner</span>
-          <span className="text-slate-600">|</span>
-          <span>🔄 Molette pour zoomer</span>
+        <div className="flex items-center gap-3 text-sm text-[#b0b8cc]">
+          <span>🖱️ Cliquer → sélectionner</span>
+          <span className="text-[#8f98b0]">|</span>
+          <span>🔄 Molette → zoomer</span>
         </div>
       </header>
 
-      {/* Scene 3D */}
-      <main className="flex-1">
+      {/* Scene 3D — prend tout l'espace restant */}
+      <main className="flex-1 min-h-0">
         <BibliothequeScene className="w-full h-full" />
       </main>
     </div>
