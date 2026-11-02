@@ -6,7 +6,16 @@ import { RoundedBox, OrbitControls } from '@react-three/drei'
 import Livre3D from './Livre3D'
 import type { Book3D } from './types'
 import { genreColor } from './genres'
-import { Color } from 'three'
+
+// ---------- Fond solide (plus fiable que scene.background) ----------
+function Fond() {
+  return (
+    <mesh position={[0, 0, -20]}>
+      <planeGeometry args={[200, 200]} />
+      <meshBasicMaterial color="#4f5a73" />
+    </mesh>
+  )
+}
 
 // ---------- Données d'exemple (34 livres, genres → couleurs) ----------
 const SAMPLE_BOOKS: Book3D[] = [
@@ -238,7 +247,6 @@ export default function BibliothequeScene({ className }: { className?: string })
         camera={{ position: [0, CABINET_HEIGHT * 0.5, 14], fov: 40 }}
         onCreated={(state) => { 
           state.gl.setClearColor('#4f5a73', 1)
-          state.scene.background = new Color('#4f5a73')
         }}
         onPointerMissed={() => { setSelectedId(null); setSelectedBook(null) }}
       >
@@ -259,6 +267,7 @@ export default function BibliothequeScene({ className }: { className?: string })
           color="#ffccaa"
         />
 
+        <Fond />
         <Mur />
         <Plante />
         <Boussole />
