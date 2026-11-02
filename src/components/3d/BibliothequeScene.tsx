@@ -67,7 +67,7 @@ function Mur() {
   return (
     <mesh position={[0, CABINET_HEIGHT / 2, -CABINET_DEPTH / 2 - 0.3]}>
       <planeGeometry args={[14, CABINET_HEIGHT + 2]} />
-      <meshStandardMaterial color="#4f5a73" roughness={0.6} />
+      <meshStandardMaterial color="#4a6d9a" roughness={0.6} />
     </mesh>
   )
 }
@@ -232,11 +232,11 @@ export default function BibliothequeScene({ className }: { className?: string })
   }
 
   return (
-    <div className={`relative ${className ?? ''}`} style={{ background: '#4f5a73', width: '100%', height: '100%' }}>
+    <div className={`relative ${className ?? ''}`} style={{ background: '#4a6d9a', width: '100%', height: '100%' }}>
       <Canvas
         camera={{ position: [0, CABINET_HEIGHT * 0.5, 14], fov: 40 }}
         legacy
-        onCreated={(state) => { state.gl.setClearColor('#4f5a73', 1) }}
+        onCreated={(state) => { state.gl.setClearColor('#4a6d9a', 1) }}
         onPointerMissed={() => { setSelectedId(null); setSelectedBook(null) }}
       >
         <ambientLight intensity={0.25} color="#ffe4c4" />

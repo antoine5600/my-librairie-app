@@ -9,9 +9,9 @@ const BibliothequeScene = dynamic(
 
 export default function Home() {
   return (
-    <div className="flex flex-col h-screen bg-[#4f5a73]">
+    <div className="flex flex-col h-screen bg-[#4a6d9a]">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-3 bg-[#4f5a73]/80 border-b border-[#3d4760] text-white">
+      <header className="flex items-center justify-between px-6 py-3 bg-[#4a6d9a]/80 border-b border-[#3d4760] text-white">
         <h1 className="text-lg font-bold tracking-tight">
           📚 My Librairie App
         </h1>
