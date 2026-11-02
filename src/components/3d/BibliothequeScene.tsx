@@ -6,6 +6,7 @@ import { RoundedBox, OrbitControls } from '@react-three/drei'
 import Livre3D from './Livre3D'
 import type { Book3D } from './types'
 import { genreColor } from './genres'
+import { Color } from 'three'
 
 // ---------- Données d'exemple (34 livres, genres → couleurs) ----------
 const SAMPLE_BOOKS: Book3D[] = [
@@ -232,11 +233,13 @@ export default function BibliothequeScene({ className }: { className?: string })
   }
 
   return (
-    <div className={`relative ${className ?? ''}`} style={{ background: '#4a6d9a', width: '100%', height: '100%' }}>
+    <div className={`relative ${className ?? ''}`} style={{ background: '#4f5a73', width: '100%', height: '100%' }}>
       <Canvas
         camera={{ position: [0, CABINET_HEIGHT * 0.5, 14], fov: 40 }}
-        legacy
-        onCreated={(state) => { state.gl.setClearColor('#4a6d9a', 1) }}
+        onCreated={(state) => { 
+          state.gl.setClearColor('#4f5a73', 1)
+          state.scene.background = new Color('#4f5a73')
+        }}
         onPointerMissed={() => { setSelectedId(null); setSelectedBook(null) }}
       >
         <ambientLight intensity={0.25} color="#ffe4c4" />
