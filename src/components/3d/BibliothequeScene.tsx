@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { RoundedBox, OrbitControls } from '@react-three/drei'
 import Livre3D from './Livre3D'
 import type { Book3D } from './types'
 import { genreColor } from './genres'
 
-// ---------- Fond solide (plus fiable que scene.background) ----------
+// ---------- Données de secours (si pas de bibliothequeId fourni) ----------
 function Fond() {
   return (
     <mesh position={[0, 0, -20]}>
@@ -232,13 +232,44 @@ function Livres({ books, onSelectBook, selectedId }: {
 
 // ---------- Scene principale ----------
 
-export default function BibliothequeScene({ className }: { className?: string }) {
+export default function BibliothequeScene({ className, bibliothequeId }: { className?: string; bibliothequeId?: number }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selectedBook, setSelectedBook] = useState<Book3D | null>(null)
+  const [books, setBooks] = useState<Book3D[]>(SAMPLE_BOOKS)
+  const [bibliothequeNom, setBibliothequeNom] = useState<string>('')
+  const [loading, setLoading] = useState(false)
+
+  // Charger les livres depuis la DB si un ID est fourni
+  useEffect(() => {
+    if (!bibliothequeId) return
+    setLoading(true)
+    fetch(`/api/bibliotheques/${bibliothequeId}`)
+      .then(r => r.json())
+      .then(data => {
+        const b = data.bibliotheque
+        setBibliothequeNom(b.nom || '')
+        const loaded: Book3D[] = (b.livres || []).map((l: any, i: number) => ({
+          id: String(l.id),
+          title: l.titre,
+          author: l.auteur,
+          genre: l.genre || 'classique',
+          thickness: l.epaisseur ?? 0.6,
+          height: l.hauteur ?? 2.0,
+          coverColor: l.couleur_dos || genreColor(l.genre || 'classique', i),
+          shelf: l.etagere ?? 0,
+          order: Math.floor(l.position_x / 0.6) || i,
+        }))
+        setBooks(loaded)
+      })
+      .catch(() => { /* fallback SAMPLE_BOOKS */ })
+      .finally(() => setLoading(false))
+  }, [bibliothequeId])
+
+  const currentBooks = books.length > 0 ? books : SAMPLE_BOOKS
 
   const handleSelectBook = (id: string) => {
     setSelectedId(id === selectedId ? null : id)
-    setSelectedBook(SAMPLE_BOOKS.find(b => b.id === id) ?? null)
+    setSelectedBook(currentBooks.find(b => b.id === id) ?? null)
   }
 
   return (
@@ -274,7 +305,7 @@ export default function BibliothequeScene({ className }: { className?: string })
         <CadreBibliotheque />
         <Etageres />
         <Livres
-          books={SAMPLE_BOOKS}
+          books={currentBooks}
           onSelectBook={handleSelectBook}
           selectedId={selectedId}
         />
