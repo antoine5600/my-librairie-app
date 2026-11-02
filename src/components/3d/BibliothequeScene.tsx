@@ -242,11 +242,8 @@ export default function BibliothequeScene({ className }: { className?: string })
         <ambientLight intensity={0.25} color="#ffe4c4" />
         <directionalLight
           position={[2, 6, 4]}
-          intensity={0.15}
+          intensity={0.2}
           color="#ffd9a0"
-          castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
         />
         <pointLight
           position={[0, CABINET_HEIGHT + 1.5, -1]}
