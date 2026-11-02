@@ -232,15 +232,14 @@ export default function BibliothequeScene({ className }: { className?: string })
   }
 
   return (
-    <div className={`relative ${className ?? ''}`}>
+    <div className={`relative w-full h-full bg-[#4f5a73] ${className ?? ''}`}>
       <Canvas
         camera={{ position: [0, CABINET_HEIGHT * 0.45, 8], fov: 38 }}
         shadows
         gl={{ antialias: true }}
-        style={{ background: '#4f5a73', display: 'block' }}
+        onCreated={(state) => { state.gl.setClearColor('#4f5a73') }}
         onPointerMissed={() => { setSelectedId(null); setSelectedBook(null) }}
       >
-        <color attach="background" args={['#4f5a73']} />
         <ambientLight intensity={0.25} color="#ffe4c4" />
         <directionalLight
           position={[2, 6, 4]}
