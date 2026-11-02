@@ -237,6 +237,7 @@ export default function BibliothequeScene({ className }: { className?: string })
         camera={{ position: [0, CABINET_HEIGHT * 0.45, 8], fov: 38 }}
         shadows
         gl={{ antialias: true }}
+        style={{ background: '#4f5a73', display: 'block' }}
         onPointerMissed={() => { setSelectedId(null); setSelectedBook(null) }}
       >
         <color attach="background" args={['#4f5a73']} />
