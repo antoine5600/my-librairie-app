@@ -4,8 +4,16 @@
  */
 import { sql } from 'drizzle-orm'
 import { db } from './index'
+import path from 'path'
+import fs from 'fs'
 
 async function main() {
+  // Créer le dossier data/ s'il n'existe pas (nécessaire sur Windows/machine fraîche)
+  const dataDir = path.join(process.cwd(), 'data')
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true })
+    console.log(`📁 Dossier créé : ${dataDir}`)
+  }
   await db.run(sql`
     CREATE TABLE IF NOT EXISTS bibliotheques (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
