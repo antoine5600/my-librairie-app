@@ -6,13 +6,15 @@ import { RoundedBox, OrbitControls } from '@react-three/drei'
 import Livre3D from './Livre3D'
 import type { Book3D } from './types'
 import { genreColor } from './genres'
+import { getAmbiance, AMBIANCE_LIST } from './ambiances'
+import type { AmbianceDef } from './ambiances'
 
 // ---------- Données de secours (si pas de bibliothequeId fourni) ----------
-function Fond() {
+function Fond({ color }: { color: string }) {
   return (
     <mesh position={[0, 0, -20]}>
       <planeGeometry args={[200, 200]} />
-      <meshBasicMaterial color="#4f5a73" />
+      <meshBasicMaterial color={color} />
     </mesh>
   )
 }
@@ -88,11 +90,11 @@ function shelfBottomY(index: number): number {
 
 // ---------- Composants ----------
 
-function Mur() {
+function Mur({ color }: { color: string }) {
   return (
     <mesh position={[0, CABINET_HEIGHT / 2, -CABINET_DEPTH / 2 - 0.3]}>
       <planeGeometry args={[CABINET_HEIGHT * 1.2, CABINET_HEIGHT + 2]} />
-      <meshStandardMaterial color="#4a6d9a" roughness={0.6} />
+      <meshStandardMaterial color={color} roughness={0.6} />
     </mesh>
   )
 }
@@ -135,11 +137,9 @@ function Boussole() {
   )
 }
 
-function CadreBibliotheque() {
-  const woodColor = '#b77e68'
-  const woodDark = '#8b6048'
+function CadreBibliotheque({ bois, boisFonce }: { bois: string; boisFonce: string }) {
   const ft = 0.18
-  const r = 0.14 // rayon d'arrondi des coins
+  const r = 0.14
 
   return (
     <group>
@@ -151,38 +151,37 @@ function CadreBibliotheque() {
 
       {/* Côté gauche — arrondi */}
       <RoundedBox args={[ft, CABINET_HEIGHT, CABINET_DEPTH]} radius={r} position={[-SHELF_WIDTH / 2 - ft / 2, CABINET_HEIGHT / 2, 0]} castShadow>
-        <meshStandardMaterial color={woodColor} roughness={0.7} />
+        <meshStandardMaterial color={bois} roughness={0.7} />
       </RoundedBox>
 
       {/* Côté droit — arrondi */}
       <RoundedBox args={[ft, CABINET_HEIGHT, CABINET_DEPTH]} radius={r} position={[SHELF_WIDTH / 2 + ft / 2, CABINET_HEIGHT / 2, 0]} castShadow>
-        <meshStandardMaterial color={woodColor} roughness={0.7} />
+        <meshStandardMaterial color={bois} roughness={0.7} />
       </RoundedBox>
 
       {/* Dessus — arrondi */}
       <RoundedBox args={[SHELF_WIDTH + 0.5, ft, CABINET_DEPTH + 0.15]} radius={r} position={[0, CABINET_HEIGHT + ft / 2, 0]} castShadow>
-        <meshStandardMaterial color={woodDark} roughness={0.6} />
+        <meshStandardMaterial color={boisFonce} roughness={0.6} />
       </RoundedBox>
 
       {/* Dessous */}
       <mesh position={[0, -ft / 2, 0]}>
         <boxGeometry args={[SHELF_WIDTH + 0.5, ft, CABINET_DEPTH + 0.15]} />
-        <meshStandardMaterial color={woodDark} roughness={0.6} />
+        <meshStandardMaterial color={boisFonce} roughness={0.6} />
       </mesh>
 
       {/* Pieds avant */}
       {[-1, 1].map(side => (
         <mesh key={`pied-${side}`} position={[side * (SHELF_WIDTH / 2 - 0.3), -ft / 2 - 0.25, CABINET_DEPTH / 2 - 0.05]}>
           <cylinderGeometry args={[0.04, 0.06, 0.3, 8]} />
-          <meshStandardMaterial color={woodDark} roughness={0.7} />
+          <meshStandardMaterial color={boisFonce} roughness={0.7} />
         </mesh>
       ))}
     </group>
   )
 }
 
-function Etageres() {
-  const woodColor = '#c48f6f'
+function Etageres({ boisEtagere }: { boisEtagere: string }) {
   const r = 0.06
   // Positions corrigées : chaque planche est SOUS le compartiment qu'elle supporte
   const positions: number[] = []
@@ -196,7 +195,7 @@ function Etageres() {
     <group>
       {positions.map((y, i) => (
         <RoundedBox key={i} args={[SHELF_WIDTH, SHELF_THICKNESS, SHELF_DEPTH]} radius={r} position={[0, y, 0]} receiveShadow castShadow>
-          <meshStandardMaterial color={woodColor} roughness={0.8} />
+          <meshStandardMaterial color={boisEtagere} roughness={0.8} />
         </RoundedBox>
       ))}
     </group>
@@ -247,12 +246,14 @@ function Livres({ books, onSelectBook, selectedId }: {
 
 // ---------- Scene principale ----------
 
-export default function BibliothequeScene({ className, bibliothequeId }: { className?: string; bibliothequeId?: number }) {
+export default function BibliothequeScene({ className, bibliothequeId, ambianceId }: { className?: string; bibliothequeId?: number; ambianceId?: string }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selectedBook, setSelectedBook] = useState<Book3D | null>(null)
   const [books, setBooks] = useState<Book3D[]>(SAMPLE_BOOKS)
   const [bibliothequeNom, setBibliothequeNom] = useState<string>('')
   const [loading, setLoading] = useState(false)
+
+  const ambiance = getAmbiance(ambianceId || 'classique')
 
   // Charger les livres depuis la DB si un ID est fourni
   useEffect(() => {
@@ -288,15 +289,15 @@ export default function BibliothequeScene({ className, bibliothequeId }: { class
   }
 
   return (
-    <div className={`relative ${className ?? ''}`} style={{ background: '#4f5a73', width: '100%', height: '100%' }}>
+    <div className={`relative ${className ?? ''}`} style={{ background: ambiance.sceneBg, width: '100%', height: '100%' }}>
       <Canvas
         camera={{ position: [0, CABINET_HEIGHT * 0.5, CABINET_HEIGHT * 1.25], fov: 50 }}
         onCreated={(state) => { 
-          state.gl.setClearColor('#4f5a73', 1)
+          state.gl.setClearColor(ambiance.sceneBg, 1)
         }}
         onPointerMissed={() => { setSelectedId(null); setSelectedBook(null) }}
       >
-        <ambientLight intensity={0.25} color="#ffe4c4" />
+        <ambientLight intensity={ambiance.lumiereIntensity} color={ambiance.lumiere} />
         <directionalLight
           position={[2, 6, 4]}
           intensity={0.2}
@@ -305,20 +306,20 @@ export default function BibliothequeScene({ className, bibliothequeId }: { class
         <pointLight
           position={[0, CABINET_HEIGHT + 1.5, -1]}
           intensity={0.08}
-          color="#ffeedd"
+          color={ambiance.lumiere}
         />
         <directionalLight
           position={[-1, 2, -2]}
           intensity={0.06}
-          color="#ffccaa"
+          color={ambiance.lumiere}
         />
 
-        <Fond />
-        <Mur />
+        <Fond color={ambiance.fond} />
+        <Mur color={ambiance.mur} />
         <Plante />
         <Boussole />
-        <CadreBibliotheque />
-        <Etageres />
+        <CadreBibliotheque bois={ambiance.bois} boisFonce={ambiance.boisFonce} />
+        <Etageres boisEtagere={ambiance.boisEtagere} />
         <Livres
           books={currentBooks}
           onSelectBook={handleSelectBook}

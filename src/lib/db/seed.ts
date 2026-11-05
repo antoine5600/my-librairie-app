@@ -54,14 +54,27 @@ const BOOKS: BookSeed[] = [
 ]
 
 async function main() {
-  // 1. Créer la bibliothèque par défaut
-  const biblioInsert = db.insert(schema.bibliotheques)
-    .values({ nom: 'Ma bibliothèque', slug: 'ma-bibliotheque', ambiance: 'classique' })
-    .returning()
+  // 1. Créer 4 bibliothèques avec ambiances différentes
+  const bibliothequesData = [
+    { nom: 'Classique', slug: 'classique', ambiance: 'classique' },
+    { nom: 'Sombre', slug: 'sombre', ambiance: 'sombre' },
+    { nom: 'Clair', slug: 'clair', ambiance: 'clair' },
+    { nom: 'Rustique', slug: 'rustique', ambiance: 'rustique' },
+  ]
 
-  const biblio = await biblioInsert
-  const biblioId = biblio[0]!.id
-  console.log(`✅ Bibliothèque créée : "${biblio[0]!.nom}" (id=${biblioId})`)
+  const biblioIds: number[] = []
+
+  for (const data of bibliothequesData) {
+    const inserted = await db.insert(schema.bibliotheques)
+      .values(data)
+      .returning()
+    biblioIds.push(inserted[0]!.id)
+    console.log(`✅ Bibliothèque créée : "${data.nom}" (id=${inserted[0]!.id}, ambiance=${data.ambiance})`)
+  }
+
+  // 2. Répartir les livres dans les 4 bibliothèques (8-9 livres chacune)
+  // Chaque bibliothèque reçoit une partie équitable des 34 livres seed
+  const livresParBiblio = Math.ceil(BOOKS.length / bibliothequesData.length)
 
   // 2. Insérer tous les livres
   for (const book of BOOKS) {
@@ -81,7 +94,10 @@ async function main() {
     const livre = await livreInsert
     const livreId = livre[0]!.id
 
-    // 3. Associer à la bibliothèque
+    // 3. Associer à la bibliothèque (distribution circulaire)
+    const biblioIndex = (book.order + book.shelf) % biblioIds.length
+    const biblioId = biblioIds[biblioIndex]!
+
     await db.insert(schema.livresBibliotheques).values({
       livre_id: livreId,
       bibliotheque_id: biblioId,
