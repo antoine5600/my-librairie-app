@@ -25,8 +25,66 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
   const inputRef = useRef<HTMLInputElement | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Focus input on mount
-  useEffect(() => { inputRef.current?.focus() }, [])
+  // Stocke les livres existants pour calculer le placement
+  const etagereDispo = useRef<Record<number, { count: number; totalWidth: number }>>({
+    0: { count: 0, totalWidth: 0 },
+    1: { count: 0, totalWidth: 0 },
+    2: { count: 0, totalWidth: 0 },
+    3: { count: 0, totalWidth: 0 },
+  })
+
+  // Focus input + calculer l'espace dispo sur chaque étagère
+  useEffect(() => {
+    inputRef.current?.focus()
+    fetch(`/api/bibliotheques/${bibliothequeId}`)
+      .then(r => r.json())
+      .then(data => {
+        const livres: any[] = data.bibliotheque?.livres || []
+        const dispo: Record<number, { count: number; totalWidth: number }> = {
+          0: { count: 0, totalWidth: 0 },
+          1: { count: 0, totalWidth: 0 },
+          2: { count: 0, totalWidth: 0 },
+          3: { count: 0, totalWidth: 0 },
+        }
+        for (const l of livres) {
+          const shelf = l.etagere ?? 0
+          if (dispo[shelf]) {
+            dispo[shelf].count++
+            dispo[shelf].totalWidth += (l.epaisseur ?? 0.6) + 0.08
+          }
+        }
+        // Trier : étagère avec le moins de largeur utilisée en premier
+        const sorted = Object.entries(dispo).sort(([, a], [, b]) => a.totalWidth - b.totalWidth)
+        etagereDispo.current = {
+          0: dispo[0],
+          1: dispo[1],
+          2: dispo[2],
+          3: dispo[3],
+          sorted, // on garde l'ordre trié
+        } as any
+      })
+      .catch(() => {})
+  }, [bibliothequeId])
+
+  /** Calcule la meilleure étagère et position pour le nouveau livre */
+  function calculerPlacement(epaisseur: number): { etagere: number; position_x: number } {
+    const dispo = etagereDispo.current as any
+    const rows = dispo.sorted || [[0, { totalWidth: 0 }]]
+    for (const [shelfStr, info] of rows) {
+      const shelf = Number(shelfStr)
+      const SHELF_WIDTH = 7.0
+      const GAP = 0.08
+      const startX = -SHELF_WIDTH / 2 + 0.25
+      const used = info.totalWidth
+      if (startX + used + epaisseur + GAP <= SHELF_WIDTH / 2 - 0.25) {
+        // Il y a de la place sur cette étagère
+        const nextX = startX + used + epaisseur / 2
+        return { etagere: shelf, position_x: Math.round(nextX * 100) / 100 }
+      }
+    }
+    // Toutes pleines : on met sur l'étagère 0 à la suite (débordera)
+    return { etagere: 0, position_x: 0 }
+  }
 
   // Debounced search
   useEffect(() => {
@@ -79,11 +137,15 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
       if (!livreRes.ok) throw new Error(livreData.error || 'Erreur création livre')
       const livreId = livreData.livre.id
 
-      // 2. Associer à la bibliothèque
+      // 2. Calculer le placement optimal
+      const epaisseur = 0.6
+      const { etagere, position_x } = calculerPlacement(epaisseur)
+
+      // 3. Associer à la bibliothèque
       const assocRes = await fetch(`/api/bibliotheques/${bibliothequeId}/livres`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ livre_id: livreId, etagere: 0, position_x: 0, position_y: 0 }),
+        body: JSON.stringify({ livre_id: livreId, etagere, position_x, position_y: 0 }),
       })
       if (!assocRes.ok) {
         const assocData = await assocRes.json()
