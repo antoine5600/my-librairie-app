@@ -45,21 +45,36 @@ const SAMPLE_BOOKS: Book3D[] = [
   { id: '24', title: 'Jane Eyre', author: 'Charlotte Brontë', genre: 'classique', thickness: 0.7, height: 2.1, coverColor: genreColor('classique', 3), shelf: 2, order: 6 },
   { id: '25', title: 'Crime et Châtiment', author: 'Fiodor Dostoïevski', genre: 'drame', thickness: 0.9, height: 2.3, coverColor: genreColor('drame', 4), shelf: 2, order: 7 },
   { id: '26', title: 'Moby Dick', author: 'Herman Melville', genre: 'aventure', thickness: 0.8, height: 2.2, coverColor: genreColor('aventure', 5), shelf: 2, order: 8 },
-  { id: '27', title: 'La Ferme des Animaux', author: 'George Orwell', genre: 'classique', thickness: 0.4, height: 1.6, coverColor: genreColor('classique', 6), shelf: 3, order: 0 },
-  { id: '28', title: 'Sa Majesté des Mouches', author: 'William Golding', genre: 'drame', thickness: 0.5, height: 1.8, coverColor: genreColor('drame', 7), shelf: 3, order: 1 },
-  { id: '29', title: 'Le Vieil Homme et la Mer', author: 'Ernest Hemingway', genre: 'classique', thickness: 0.4, height: 1.7, coverColor: genreColor('classique', 0), shelf: 3, order: 2 },
-  { id: '30', title: 'Autant en emporte le vent', author: 'Margaret Mitchell', genre: 'romance', thickness: 1.0, height: 2.3, coverColor: genreColor('romance', 1), shelf: 3, order: 3 },
-  { id: '31', title: 'Les Hauts de Hurlevent', author: 'Emily Brontë', genre: 'classique', thickness: 0.6, height: 2.0, coverColor: genreColor('classique', 2), shelf: 3, order: 4 },
-  { id: '32', title: "Tess d'Urberville", author: 'Thomas Hardy', genre: 'drame', thickness: 0.7, height: 2.1, coverColor: genreColor('drame', 3), shelf: 3, order: 5 },
-  { id: '33', title: 'Le Parfum', author: 'Patrick Süskind', genre: 'historique', thickness: 0.5, height: 2.0, coverColor: genreColor('historique', 4), shelf: 3, order: 6 },
-  { id: '34', title: 'Le Pendule de Foucault', author: 'Umberto Eco', genre: 'thriller', thickness: 0.7, height: 2.2, coverColor: genreColor('thriller', 5), shelf: 3, order: 7 },
+  { id: '27', title: 'La Ferme des Animaux', author: 'George Orwell', genre: 'classique', thickness: 0.4, height: 1.6, coverColor: genreColor('classique', 6), shelf: 4, order: 0 },
+  { id: '28', title: 'Sa Majesté des Mouches', author: 'William Golding', genre: 'drame', thickness: 0.5, height: 1.8, coverColor: genreColor('drame', 7), shelf: 4, order: 1 },
+  { id: '29', title: 'Le Vieil Homme et la Mer', author: 'Ernest Hemingway', genre: 'classique', thickness: 0.4, height: 1.7, coverColor: genreColor('classique', 0), shelf: 4, order: 2 },
+  { id: '30', title: 'Autant en emporte le vent', author: 'Margaret Mitchell', genre: 'romance', thickness: 1.0, height: 2.3, coverColor: genreColor('romance', 1), shelf: 4, order: 3 },
+  { id: '31', title: 'Les Hauts de Hurlevent', author: 'Emily Brontë', genre: 'classique', thickness: 0.6, height: 2.0, coverColor: genreColor('classique', 2), shelf: 5, order: 0 },
+  { id: '32', title: "Tess d'Urberville", author: 'Thomas Hardy', genre: 'drame', thickness: 0.7, height: 2.1, coverColor: genreColor('drame', 3), shelf: 5, order: 1 },
+  { id: '33', title: 'Le Parfum', author: 'Patrick Süskind', genre: 'historique', thickness: 0.5, height: 2.0, coverColor: genreColor('historique', 4), shelf: 5, order: 2 },
+  { id: '34', title: 'Le Pendule de Foucault', author: 'Umberto Eco', genre: 'thriller', thickness: 0.7, height: 2.2, coverColor: genreColor('thriller', 5), shelf: 5, order: 3 },
+  // --- Livres ajoutés pour remplir les étagères ---
+  { id: '35', title: 'Bel-Ami', author: 'Guy de Maupassant', genre: 'classique', thickness: 0.6, height: 2.0, coverColor: genreColor('classique', 0), shelf: 5, order: 4 },
+  { id: '36', title: 'Germinal', author: 'Émile Zola', genre: 'drame', thickness: 0.9, height: 2.3, coverColor: genreColor('drame', 1), shelf: 5, order: 5 },
+  { id: '37', title: 'Madame Bovary', author: 'Gustave Flaubert', genre: 'classique', thickness: 0.7, height: 2.1, coverColor: genreColor('classique', 2), shelf: 5, order: 6 },
+  { id: '38', title: 'Le Rouge et le Noir', author: 'Stendhal', genre: 'classique', thickness: 0.8, height: 2.2, coverColor: genreColor('classique', 3), shelf: 5, order: 7 },
+  { id: '39', title: 'Les Fleurs du Mal', author: 'Charles Baudelaire', genre: 'classique', thickness: 0.4, height: 1.7, coverColor: genreColor('classique', 4), shelf: 5, order: 8 },
+  { id: '40', title: 'Le Grand Meaulnes', author: 'Alain-Fournier', genre: 'drame', thickness: 0.6, height: 2.0, coverColor: genreColor('drame', 5), shelf: 6, order: 0 },
+  { id: '41', title: 'Voyage au bout de la nuit', author: 'Louis-Ferdinand Céline', genre: 'drame', thickness: 0.8, height: 2.2, coverColor: genreColor('drame', 6), shelf: 6, order: 1 },
+  { id: '42', title: 'La Condition Humaine', author: 'André Malraux', genre: 'drame', thickness: 0.7, height: 2.1, coverColor: genreColor('drame', 7), shelf: 6, order: 2 },
+  { id: '43', title: 'Zadig', author: 'Voltaire', genre: 'philosophie', thickness: 0.4, height: 1.6, coverColor: genreColor('philosophie', 0), shelf: 6, order: 3 },
+  { id: '44', title: 'Candide', author: 'Voltaire', genre: 'philosophie', thickness: 0.4, height: 1.7, coverColor: genreColor('philosophie', 1), shelf: 6, order: 4 },
+  { id: '45', title: "L'Île au Trésor", author: 'R.L. Stevenson', genre: 'aventure', thickness: 0.6, height: 2.0, coverColor: genreColor('aventure', 0), shelf: 6, order: 5 },
+  { id: '46', title: 'Le Tour du Monde en 80 Jours', author: 'Jules Verne', genre: 'aventure', thickness: 0.7, height: 2.1, coverColor: genreColor('aventure', 1), shelf: 6, order: 6 },
+  { id: '47', title: 'Robinson Crusoé', author: 'Daniel Defoe', genre: 'aventure', thickness: 0.8, height: 2.2, coverColor: genreColor('aventure', 2), shelf: 6, order: 7 },
+  { id: '48', title: 'Les Contemplations', author: 'Victor Hugo', genre: 'classique', thickness: 0.7, height: 2.1, coverColor: genreColor('classique', 3), shelf: 6, order: 8 },
 ]
 
-// ---------- Paramètres bibliothèque ----------
-const SHELF_COUNT = 4
-const SHELF_HEIGHTS = [2.5, 2.5, 2.6, 2.4]
+// ---------- Paramètres bibliothèque (7 étagères, ~100 livres) ----------
+const SHELF_COUNT = 7
+const SHELF_HEIGHTS = [2.4, 2.5, 2.6, 2.4, 2.5, 2.6, 2.4]
 const SHELF_THICKNESS = 0.15
-const SHELF_WIDTH = 7.0
+const SHELF_WIDTH = 11.0
 const SHELF_DEPTH = 1.6
 const CABINET_HEIGHT = SHELF_HEIGHTS.reduce((a, b) => a + b, 0) + SHELF_THICKNESS * (SHELF_COUNT + 1)
 const CABINET_DEPTH = SHELF_DEPTH + 0.25
@@ -76,7 +91,7 @@ function shelfBottomY(index: number): number {
 function Mur() {
   return (
     <mesh position={[0, CABINET_HEIGHT / 2, -CABINET_DEPTH / 2 - 0.3]}>
-      <planeGeometry args={[14, CABINET_HEIGHT + 2]} />
+      <planeGeometry args={[CABINET_HEIGHT * 1.2, CABINET_HEIGHT + 2]} />
       <meshStandardMaterial color="#4a6d9a" roughness={0.6} />
     </mesh>
   )
@@ -275,7 +290,7 @@ export default function BibliothequeScene({ className, bibliothequeId }: { class
   return (
     <div className={`relative ${className ?? ''}`} style={{ background: '#4f5a73', width: '100%', height: '100%' }}>
       <Canvas
-        camera={{ position: [0, CABINET_HEIGHT * 0.5, 14], fov: 40 }}
+        camera={{ position: [0, CABINET_HEIGHT * 0.5, CABINET_HEIGHT * 1.25], fov: 50 }}
         onCreated={(state) => { 
           state.gl.setClearColor('#4f5a73', 1)
         }}
@@ -317,8 +332,8 @@ export default function BibliothequeScene({ className, bibliothequeId }: { class
           enableZoom
           enableDamping
           dampingFactor={0.1}
-          minDistance={4}
-          maxDistance={18}
+          minDistance={CABINET_HEIGHT * 0.2}
+          maxDistance={CABINET_HEIGHT * 2.2}
           target={[0, CABINET_HEIGHT / 2, 0]}
         />
       </Canvas>
