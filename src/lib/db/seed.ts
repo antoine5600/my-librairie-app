@@ -54,6 +54,12 @@ const BOOKS: BookSeed[] = [
 ]
 
 async function main() {
+  // 0. Nettoyer les anciennes données
+  await db.delete(schema.livresBibliotheques)
+  await db.delete(schema.livres)
+  await db.delete(schema.bibliotheques)
+  console.log('🧹 Anciennes données supprimées')
+
   // 1. Créer 4 bibliothèques avec ambiances différentes
   const bibliothequesData = [
     { nom: 'Salon', slug: 'salon', ambiance: 'classique', capacite_max: 30 },
