@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { RoundedBox, OrbitControls } from '@react-three/drei'
 import Livre3D from './Livre3D'
 import type { Book3D } from './types'
 import { genreColor } from './genres'
 import { getAmbiance, AMBIANCE_LIST } from './ambiances'
-import type { AmbianceDef } from './ambiances'
 
 // ---------- Données de secours (si pas de bibliothequeId fourni) ----------
 function Fond({ color }: { color: string }) {
@@ -309,13 +308,19 @@ function Etageres({ boisEtagere }: { boisEtagere: string }) {
   )
 }
 
-function Livres({ books, onSelectBook, selectedId }: {
+function Livres({ books, onSelectBook, selectedId, draggingId, dragTarget, onDragStart }:
+{
   books: Book3D[]
   onSelectBook: (id: string) => void
   selectedId: string | null
+  draggingId: string | null
+  dragTarget: { shelf: number; x: number } | null
+  onDragStart: (id: string) => void
 }) {
   const booksByShelf: Book3D[][] = Array.from({ length: SHELF_COUNT }, () => [])
-  for (const book of books) booksByShelf[book.shelf]?.push(book)
+  for (const book of books) {
+    if (book.id !== draggingId) booksByShelf[book.shelf]?.push(book)
+  }
 
   return (
     <group>
@@ -343,10 +348,35 @@ function Livres({ books, onSelectBook, selectedId }: {
               position={pos}
               selected={book.id === selectedId}
               onSelect={onSelectBook}
+              onDragStart={onDragStart}
+              dragging={book.id === draggingId}
             />
           )
         })
       })}
+      {/* Livre en cours de glissement — suit le curseur */}
+      {draggingId && dragTarget && (() => {
+        const book = books.find(b => b.id === draggingId)
+        if (!book) return null
+        const baseY = shelfBottomY(dragTarget.shelf) + SHELF_THICKNESS + 0.04
+        return (
+          <Livre3D
+            key={`drag-${book.id}`}
+            id={book.id}
+            title={book.title}
+            author={book.author}
+            thickness={book.thickness}
+            height={Math.min(book.height, SHELF_HEIGHTS[dragTarget.shelf] - 0.08)}
+            depth={SHELF_DEPTH - 0.25}
+            color={book.coverColor}
+            position={[dragTarget.x, baseY, 0.5]}
+            selected={false}
+            onSelect={() => {}}
+            onDragStart={() => {}}
+            dragging={true}
+          />
+        )
+      })()}
     </group>
   )
 }
@@ -394,6 +424,74 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
   }, [bibliothequeId])
 
   const currentBooks = books.length > 0 ? books.filter((b) => !b.statut || b.statut === 'present') : SAMPLE_BOOKS
+
+  // Drag & Drop
+  const [dragState, setDragState] = useState<{ id: string; shelf: number; x: number } | null>(null)
+
+  const handleDragStart = useCallback((id: string) => {
+    const book = currentBooks.find(b => b.id === id)
+    if (book) setDragState({ id, shelf: book.shelf, x: 0 })
+  }, [currentBooks])
+
+  const handleDragMove = useCallback((target: { shelf: number; x: number }) => {
+    setDragState(prev => prev ? { ...prev, shelf: target.shelf, x: target.x } : null)
+  }, [])
+
+  const handleDragEnd = useCallback(async () => {
+    if (!dragState || !bibliothequeId || !currentBooks) return
+    const { id, shelf, x } = dragState
+    const book = currentBooks.find(b => b.id === id)
+    if (!book || !book.associationId) return
+
+    const posX = Math.max(0, Math.round((x + SHELF_WIDTH / 2) * 100) / 100)
+    try {
+      await fetch(`/api/bibliotheques/${bibliothequeId}/livres`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ association_id: book.associationId, etagere: shelf, position_x: posX }),
+      })
+      // Recharger les livres
+      const res = await fetch(`/api/bibliotheques/${bibliothequeId}`)
+      const data = await res.json()
+      const b = data.bibliotheque
+      const loaded: Book3D[] = (b.livres || []).map((l: any, i: number) => ({
+        id: String(l.id), title: l.titre, author: l.auteur,
+        genre: l.genre || 'classique', thickness: l.epaisseur ?? 0.6,
+        height: l.hauteur ?? 2.0,
+        coverColor: l.couleur_dos || genreColor(l.genre || 'classique', i),
+        shelf: l.etagere ?? 0, order: Math.floor(l.position_x / 0.6) || i,
+        associationId: l.association_id,
+        statut: l.statut || 'present',
+        emprunteur: l.emprunteur,
+      }))
+      setBooks(loaded)
+      onChange?.()
+    } catch (e) {
+      console.error('Erreur déplacement livre:', e)
+    }
+    setDragState(null)
+  }, [dragState, bibliothequeId, currentBooks, onChange])
+
+  function DragPlane() {
+    return (
+      <mesh
+        position={[0, CABINET_HEIGHT / 2, 0.5]}
+        onPointerMove={(e) => {
+          e.stopPropagation()
+          const clampedX = Math.max(-SHELF_WIDTH / 2 + 0.2, Math.min(SHELF_WIDTH / 2 - 0.2, e.point.x))
+          let targetShelf = 0
+          for (let i = SHELF_COUNT - 1; i >= 0; i--) {
+            if (e.point.y >= shelfBottomY(i)) { targetShelf = i; break }
+          }
+          handleDragMove({ shelf: Math.min(targetShelf, SHELF_COUNT - 1), x: clampedX })
+        }}
+        onPointerUp={() => { handleDragEnd() }}
+      >
+        <planeGeometry args={[SHELF_WIDTH + 2, CABINET_HEIGHT + 2]} />
+        <meshBasicMaterial transparent opacity={0.1} />
+      </mesh>
+    )
+  }
 
   // Helper recharger les livres de la bibliothèque courante
   const reloadBooks = async (biblioId: number): Promise<Book3D[]> => {
@@ -453,7 +551,11 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
           books={currentBooks}
           onSelectBook={handleSelectBook}
           selectedId={selectedId}
+          draggingId={dragState?.id ?? null}
+          dragTarget={dragState ? { shelf: dragState.shelf, x: dragState.x } : null}
+          onDragStart={handleDragStart}
         />
+        {dragState && <DragPlane />}
 
         {/* ZOOM uniquement */}
         <OrbitControls

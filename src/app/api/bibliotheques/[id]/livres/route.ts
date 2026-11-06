@@ -54,6 +54,46 @@ export async function POST(
   return NextResponse.json({ association: inserted[0] }, { status: 201 })
 }
 
+// PATCH /api/bibliotheques/[id]/livres — déplacer un livre (étagère + position)
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: idStr } = await params
+  const biblioId = Number(idStr)
+  if (!Number.isInteger(biblioId)) {
+    return NextResponse.json({ error: 'ID bibliothèque invalide.' }, { status: 400 })
+  }
+
+  const body = await req.json().catch(() => null)
+  const associationId = Number(body?.association_id)
+
+  if (!Number.isInteger(associationId)) {
+    return NextResponse.json({ error: 'association_id est requis.' }, { status: 400 })
+  }
+
+  const updateData: Record<string, number> = {}
+  if (typeof body.etagere === 'number') updateData.etagere = body.etagere
+  if (typeof body.position_x === 'number') updateData.position_x = body.position_x
+
+  if (Object.keys(updateData).length === 0) {
+    return NextResponse.json({ error: 'Aucune donnée à mettre à jour.' }, { status: 400 })
+  }
+
+  const updated = await db.update(schema.livresBibliotheques)
+    .set(updateData)
+    .where(
+      and(eq(schema.livresBibliotheques.id, associationId), eq(schema.livresBibliotheques.bibliotheque_id, biblioId))
+    )
+    .returning()
+
+  if (!updated[0]) {
+    return NextResponse.json({ error: 'Association introuvable.' }, { status: 404 })
+  }
+
+  return NextResponse.json({ association: updated[0] })
+}
+
 // DELETE /api/bibliotheques/[id]/livres — retire l'association (livre de la bibliothèque)
 export async function DELETE(
   req: Request,

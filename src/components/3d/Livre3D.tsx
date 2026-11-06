@@ -16,6 +16,8 @@ interface Livre3DProps {
   onSelect?: (id: string) => void
   id?: string
   selected?: boolean
+  onDragStart?: (id: string) => void
+  dragging?: boolean
 }
 
 function darken(hex: string, amount: number): string {
@@ -67,12 +69,21 @@ export default function Livre3D({
   onSelect,
   id,
   selected = false,
+  onDragStart,
+  dragging = false,
 }: Livre3DProps) {
   const [hovered, setHovered] = useState(false)
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation()
     if (onSelect && id) onSelect(id)
+  }
+
+  const handlePointerDown = (e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation()
+    if (onDragStart && id) {
+      onDragStart(id)
+    }
   }
 
   const edgeColor = darken(color, 35)
@@ -88,13 +99,14 @@ export default function Livre3D({
       onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
       onPointerOut={() => setHovered(false)}
       onClick={handleClick}
+      onPointerDown={handlePointerDown}
     >
       {/* Corps principal — dos du livre */}
       <mesh position={[0, height / 2, 0]} castShadow receiveShadow>
         <boxGeometry args={[thickness, height, depth]} />
         <meshStandardMaterial
-          color={hovered || selected ? '#ffd700' : color}
-          roughness={hovered ? 0.3 : 0.65}
+          color={hovered || selected || dragging ? '#ffd700' : color}
+          roughness={hovered && !dragging ? 0.3 : 0.65}
         />
       </mesh>
 
