@@ -119,29 +119,28 @@ function Mur({ color }: { color: string }) {
 
 function Plante() {
   return (
-    <group position={[-SHELF_WIDTH / 2 - 0.15, CABINET_HEIGHT + 0.1, 0.3]}>
-      <mesh position={[0, 0.3, 0]}><cylinderGeometry args={[0.2, 0.35, 0.4, 12]} /><meshStandardMaterial color="#c0734f" roughness={0.8} /></mesh>
-      <mesh position={[0, 0.6, 0]}><cylinderGeometry args={[0.04, 0.04, 0.3, 6]} /><meshStandardMaterial color="#5d7a3f" /></mesh>
-      <mesh position={[0, 0.8, 0]}><sphereGeometry args={[0.25, 8, 8]} /><meshStandardMaterial color="#6d9a5f" roughness={0.9} /></mesh>
-      <mesh position={[0.1, 0.85, 0.1]}><sphereGeometry args={[0.15, 6, 6]} /><meshStandardMaterial color="#7aaa5f" roughness={0.9} /></mesh>
+    <group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}>
+      <mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.15, 0.25, 0.3, 12]} /><meshStandardMaterial color="#c0734f" roughness={0.8} /></mesh>
+      <mesh position={[0, 0.4, 0]}><cylinderGeometry args={[0.04, 0.04, 0.25, 6]} /><meshStandardMaterial color="#5d7a3f" /></mesh>
+      <mesh position={[0, 0.6, 0]}><sphereGeometry args={[0.2, 8, 8]} /><meshStandardMaterial color="#6d9a5f" roughness={0.9} /></mesh>
     </group>
   )
 }
 
 function LampeBureau() {
   return (
-    <group position={[-SHELF_WIDTH / 2 - 0.15, CABINET_HEIGHT + 0.05, 0.3]}>
-      <mesh position={[0, 0.1, 0]}><cylinderGeometry args={[0.15, 0.2, 0.2, 12]} /><meshStandardMaterial color="#374151" roughness={0.7} /></mesh>
-      <mesh position={[0, 0.3, 0]}><cylinderGeometry args={[0.04, 0.04, 0.25, 8]} /><meshStandardMaterial color="#6b7280" roughness={0.6} /></mesh>
-      <mesh position={[0, 0.5, 0]}><cylinderGeometry args={[0.25, 0.04, 0.3, 12]} /><meshStandardMaterial color="#9ca3af" roughness={0.5} /></mesh>
+    <group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}>
+      <mesh position={[0, 0.12, 0]}><cylinderGeometry args={[0.12, 0.18, 0.25, 12]} /><meshStandardMaterial color="#374151" roughness={0.7} /></mesh>
+      <mesh position={[0, 0.35, 0]}><cylinderGeometry args={[0.04, 0.04, 0.3, 8]} /><meshStandardMaterial color="#6b7280" roughness={0.6} /></mesh>
+      <mesh position={[0, 0.55, 0]}><cylinderGeometry args={[0.2, 0.04, 0.25, 12]} /><meshStandardMaterial color="#9ca3af" roughness={0.5} /></mesh>
     </group>
   )
 }
 
 function VaseFleurs() {
   return (
-    <group position={[-SHELF_WIDTH / 2 - 0.15, CABINET_HEIGHT + 0.1, 0.3]}>
-      <mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.12, 0.18, 0.25, 10]} /><meshStandardMaterial color="#e8d5c4" roughness={0.8} /></mesh>
+    <group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}>
+      <mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.1, 0.15, 0.25, 10]} /><meshStandardMaterial color="#e8d5c4" roughness={0.8} /></mesh>
       <mesh position={[0, 0.35, 0]}><sphereGeometry args={[0.15, 6, 6]} /><meshStandardMaterial color="#f0a0b0" roughness={0.9} /></mesh>
       <mesh position={[0.08, 0.4, 0.05]}><sphereGeometry args={[0.1, 6, 6]} /><meshStandardMaterial color="#e08090" roughness={0.9} /></mesh>
     </group>
@@ -150,9 +149,9 @@ function VaseFleurs() {
 
 function Caisses() {
   return (
-    <group position={[-SHELF_WIDTH / 2 - 0.15, CABINET_HEIGHT + 0.05, 0.3]}>
-      <mesh position={[0, 0.1, 0]}><boxGeometry args={[0.3, 0.2, 0.3]} /><meshStandardMaterial color="#6d4c41" roughness={0.8} /></mesh>
-      <mesh position={[0.15, 0.25, 0]}><boxGeometry args={[0.2, 0.15, 0.3]} /><meshStandardMaterial color="#8b6048" roughness={0.8} /></mesh>
+    <group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}>
+      <mesh position={[0.05, 0.12, 0]}><boxGeometry args={[0.25, 0.25, 0.25]} /><meshStandardMaterial color="#6d4c41" roughness={0.8} /></mesh>
+      <mesh position={[-0.1, 0.25, 0]}><boxGeometry args={[0.2, 0.15, 0.25]} /><meshStandardMaterial color="#8b6048" roughness={0.8} /></mesh>
     </group>
   )
 }
