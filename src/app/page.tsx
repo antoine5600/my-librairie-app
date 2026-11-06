@@ -25,7 +25,7 @@ export default function Home() {
   const [addOpen, setAddOpen] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [prets, setPrets] = useState<Array<{ titre: string; emprunteur?: string }>>([])
+  const [prets, setPrets] = useState<Array<{ titre: string; emprunteur?: string; associationId?: number }>>([])
 
   // Charger la liste des bibliothèques
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function Home() {
         .then(r => r.json())
         .then(data => {
           const livres: any[] = data.bibliotheque?.livres || []
-          setPrets(livres.filter((l: any) => l.statut === 'prete').map((l: any) => ({ titre: l.titre, emprunteur: l.emprunteur })))
+          setPrets(livres.filter((l: any) => l.statut === 'prete').map((l: any) => ({ titre: l.titre, emprunteur: l.emprunteur, associationId: l.association_id })))
         })
         .catch(() => {})
     }
@@ -121,20 +121,39 @@ export default function Home() {
                                 )
                               })}
 
-                              {/* Livres prêtés */}
-                              {prets.length > 0 && (
-                                <>
-                                  <h2 className="text-[#9ca3af] text-xs font-semibold uppercase tracking-wider px-2 mt-4 mb-2">
-                                    📤 Prêtés ({prets.length})
-                                  </h2>
-                                  {prets.map((p, i) => (
-                                    <div key={i} className="px-3 py-2 text-xs text-[#d1d5db] border-b border-[#4f5a73]/30 last:border-b-0">
-                                      <p className="font-medium truncate">{p.titre}</p>
-                                      {p.emprunteur && <p className="text-[#9ca3af] text-[10px] mt-0.5">→ {p.emprunteur}</p>}
-                                    </div>
-                                  ))}
-                                </>
-                              )}
+                              {/* Livres prêtés — toujours visible */}
+                                            <h2 className="text-[#9ca3af] text-xs font-semibold uppercase tracking-wider px-2 mt-4 mb-2">
+                                              📤 Prêtés {prets.length > 0 ? `(${prets.length})` : ''}
+                                            </h2>
+                                            {prets.length === 0 && (
+                                              <p className="text-[#6b7280] text-[10px] px-2">Aucun livre prêté</p>
+                                            )}
+                                            {prets.map((p, i) => (
+                                              <div key={i} className="flex items-center gap-2 px-3 py-2 text-xs text-[#d1d5db]">
+                                                <span className="truncate flex-1 min-w-0">
+                                                  {p.titre}
+                                                  {p.emprunteur && <span className="text-[#9ca3af] text-[10px] block">→ {p.emprunteur}</span>}
+                                                </span>
+                                                {p.associationId && activeId && (
+                                                  <button
+                                                    onClick={async () => {
+                                                      try {
+                                                        await fetch(`/api/bibliotheques/${activeId}/livres`, {
+                                                          method: 'PUT',
+                                                          headers: { 'Content-Type': 'application/json' },
+                                                          body: JSON.stringify({ association_id: p.associationId, statut: 'present' }),
+                                                        })
+                                                        setRefreshKey(k => k + 1)
+                                                      } catch {}
+                                                    }}
+                                                    className="px-2 py-0.5 text-xs text-white bg-green-600 hover:bg-green-700 rounded transition-colors shrink-0"
+                                                    title="Récupérer ce livre"
+                                                  >
+                                                    📥
+                                                  </button>
+                                                )}
+                                              </div>
+                                            ))}
                             </aside>
         )}
 
