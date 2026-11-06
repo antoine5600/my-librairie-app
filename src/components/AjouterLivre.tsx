@@ -22,6 +22,8 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
   const [selected, setSelected] = useState<Suggestion | null>(null)
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState('')
+  const [duplicateDetected, setDuplicateDetected] = useState(false)
+  const [forceAdd, setForceAdd] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -33,8 +35,6 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
     3: { count: 0, totalWidth: 0 },
   })
   const livresExistants = useRef<Array<{ titre: string; isbn?: string | null }>>([])
-  let duplicateDetected = false
-  let forceAdd = false
 
   // Focus input + calculer l'espace dispo sur chaque étagère
   useEffect(() => {
@@ -117,19 +117,19 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
     setError('')
 
     // Détection doublon
-    duplicateDetected = false
-    forceAdd = false
+    setDuplicateDetected(false)
+    setForceAdd(false)
     const existing = livresExistants.current
     const matchIsbn = s.isbn && existing.some((l) => l.isbn === s.isbn)
     const matchTitle = existing.some((l) => l.titre.toLowerCase().trim() === s.titre.toLowerCase().trim())
-    if (matchIsbn || matchTitle) duplicateDetected = true
+    if (matchIsbn || matchTitle) setDuplicateDetected(true)
   }
 
   const handleAdd = async () => {
     if (!selected) return
     // Forcer si doublon détecté + pas encore forcé
     if (duplicateDetected && !forceAdd) {
-      forceAdd = true
+      setForceAdd(true)
       setAdding(false)
       setError('')
       return
