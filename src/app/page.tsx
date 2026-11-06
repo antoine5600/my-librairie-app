@@ -25,7 +25,8 @@ export default function Home() {
   const [addOpen, setAddOpen] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [prets, setPrets] = useState<Array<{ titre: string; emprunteur?: string; associationId?: number }>>([])
+  // Stocke les livres prêtés de toutes les bibliothèques
+  const [prets, setPrets] = useState<Array<{ titre: string; emprunteur?: string; associationId?: number; biblioNom?: string; biblioId?: number }>>([])
 
   // Charger la liste des bibliothèques
   useEffect(() => {
@@ -37,16 +38,25 @@ export default function Home() {
         if (!activeId && list.length > 0) setActiveId(list[0].id)
       })
       .catch(() => {})
-    // Charger les prêtés de la bibliothèque active
-    if (activeId) {
-      fetch(`/api/bibliotheques/${activeId}`)
-        .then(r => r.json())
-        .then(data => {
-          const livres: any[] = data.bibliotheque?.livres || []
-          setPrets(livres.filter((l: any) => l.statut === 'prete').map((l: any) => ({ titre: l.titre, emprunteur: l.emprunteur, associationId: l.association_id })))
-        })
-        .catch(() => {})
-    }
+    // Charger les prêtés de toutes les bibliothèques — pas besoin d'activeId
+    fetch('/api/bibliotheques')
+      .then(r => r.json())
+      .then(async (data) => {
+        const biblioList: Array<{ id: number; nom: string }> = data.bibliotheques || []
+        const tousPrets: Array<{ titre: string; emprunteur?: string; associationId?: number; biblioNom?: string; biblioId?: number }> = []
+
+        for (const b of biblioList) {
+          const res = await fetch(`/api/bibliotheques/${b.id}`).then(r => r.json())
+          const livres: any[] = res.bibliotheque?.livres || []
+          for (const l of livres) {
+            if (l.statut === 'prete') {
+              tousPrets.push({ titre: l.titre, emprunteur: l.emprunteur, associationId: l.association_id, biblioNom: b.nom, biblioId: b.id })
+            }
+          }
+        }
+        setPrets(tousPrets)
+      })
+      .catch(() => {})
   }, [refreshKey, activeId])
 
   const activeBiblio = bibliotheques.find(b => b.id === activeId)
@@ -133,12 +143,13 @@ export default function Home() {
                                                 <span className="truncate flex-1 min-w-0">
                                                   {p.titre}
                                                   {p.emprunteur && <span className="text-[#9ca3af] text-[10px] block">→ {p.emprunteur}</span>}
+                                                  {p.biblioNom && <span className="text-[#6b7280] text-[9px] block">📚 {p.biblioNom}</span>}
                                                 </span>
-                                                {p.associationId && activeId && (
+                                                {p.associationId && p.biblioId && (
                                                   <button
                                                     onClick={async () => {
                                                       try {
-                                                        await fetch(`/api/bibliotheques/${activeId}/livres`, {
+                                                        await fetch(`/api/bibliotheques/${p.biblioId}/livres`, {
                                                           method: 'PUT',
                                                           headers: { 'Content-Type': 'application/json' },
                                                           body: JSON.stringify({ association_id: p.associationId, statut: 'present' }),
