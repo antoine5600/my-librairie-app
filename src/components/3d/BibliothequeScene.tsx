@@ -246,7 +246,7 @@ function Livres({ books, onSelectBook, selectedId }: {
 
 // ---------- Scene principale ----------
 
-export default function BibliothequeScene({ className, bibliothequeId, ambianceId }: { className?: string; bibliothequeId?: number; ambianceId?: string }) {
+export default function BibliothequeScene({ className, bibliothequeId, ambianceId, onChange }: { className?: string; bibliothequeId?: number; ambianceId?: string; onChange?: () => void }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selectedBook, setSelectedBook] = useState<Book3D | null>(null)
   const [books, setBooks] = useState<Book3D[]>(SAMPLE_BOOKS)
@@ -379,7 +379,7 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ association_id: selectedBook.associationId, statut: 'present' }),
                       })
-                      reloadBooks(bibliothequeId).then(setBooks)
+                      reloadBooks(bibliothequeId).then((b) => { setBooks(b); onChange?.() })
                       setSelectedId(null); setSelectedBook(null)
                     } catch {}
                   }}
@@ -403,7 +403,7 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ association_id: selectedBook.associationId, statut: 'prete', emprunteur: nom?.value || '' }),
                         })
-                        reloadBooks(bibliothequeId).then(setBooks)
+                        reloadBooks(bibliothequeId).then((b) => { setBooks(b); onChange?.() })
                         setSelectedId(null); setSelectedBook(null)
                       } catch {}
                     }}
@@ -423,7 +423,7 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ association_id: selectedBook.associationId }),
                     })
-                    reloadBooks(bibliothequeId).then(setBooks)
+                    reloadBooks(bibliothequeId).then((b) => { setBooks(b); onChange?.() })
                     setSelectedId(null); setSelectedBook(null)
                   } catch {}
                 }}

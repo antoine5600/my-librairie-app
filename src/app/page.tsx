@@ -175,6 +175,7 @@ export default function Home() {
             className="w-full h-full"
             bibliothequeId={activeId ?? undefined}
             ambianceId={activeAmbiance}
+            onChange={() => setRefreshKey(k => k + 1)}
           />
         </main>
       </div>
