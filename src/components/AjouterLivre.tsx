@@ -32,6 +32,9 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
     2: { count: 0, totalWidth: 0 },
     3: { count: 0, totalWidth: 0 },
   })
+  const livresExistants = useRef<Array<{ titre: string; isbn?: string | null }>>([])
+  let duplicateDetected = false
+  let forceAdd = false
 
   // Focus input + calculer l'espace dispo sur chaque étagère
   useEffect(() => {
@@ -53,6 +56,7 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
             dispo[shelf].totalWidth += (l.epaisseur ?? 0.6) + 0.08
           }
         }
+        livresExistants.current = livres.map((l: any) => ({ titre: l.titre || '', isbn: l.isbn || null }))
         // Trier : étagère avec le moins de largeur utilisée en premier
         const sorted = Object.entries(dispo).sort(([, a], [, b]) => a.totalWidth - b.totalWidth)
         etagereDispo.current = {
@@ -111,10 +115,25 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
     setResults([])
     setQuery(`${s.titre} — ${s.auteur}`)
     setError('')
+
+    // Détection doublon
+    duplicateDetected = false
+    forceAdd = false
+    const existing = livresExistants.current
+    const matchIsbn = s.isbn && existing.some((l) => l.isbn === s.isbn)
+    const matchTitle = existing.some((l) => l.titre.toLowerCase().trim() === s.titre.toLowerCase().trim())
+    if (matchIsbn || matchTitle) duplicateDetected = true
   }
 
   const handleAdd = async () => {
     if (!selected) return
+    // Forcer si doublon détecté + pas encore forcé
+    if (duplicateDetected && !forceAdd) {
+      forceAdd = true
+      setAdding(false)
+      setError('')
+      return
+    }
     setAdding(true)
     setError('')
 
@@ -223,6 +242,16 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
                   {selected.isbn && <p className="text-[#6b7280] text-[10px] mt-0.5">ISBN: {selected.isbn}</p>}
                 </div>
               </div>
+              {/* Alerte doublon */}
+              {duplicateDetected && !forceAdd && (
+                <div className="mt-2 flex items-center gap-3 p-2 rounded-lg bg-yellow-900/20 border border-yellow-600">
+                  <span className="text-yellow-400 text-base">⚠️</span>
+                  <div className="min-w-0">
+                    <p className="text-yellow-300 text-xs font-semibold">Ce livre semble déjà présent</p>
+                    <p className="text-[#9ca3af] text-[10px]">ISBN ou titre identique trouvé dans cette bibliothèque.</p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -239,7 +268,7 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
             disabled={!selected || adding}
             className="px-5 py-2 text-sm text-white bg-[#3b6b9f] hover:bg-[#4a7dbf] disabled:bg-[#4f5a73] disabled:text-[#6b7280] rounded-lg transition-colors"
           >
-            {adding ? 'Ajout…' : 'Ajouter à la bibliothèque'}
+            {adding ? 'Ajout…' : (duplicateDetected && !forceAdd ? 'Ajouter quand même' : 'Ajouter à la bibliothèque')}
           </button>
         </div>
       </div>
