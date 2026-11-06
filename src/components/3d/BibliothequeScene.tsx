@@ -72,15 +72,33 @@ const SAMPLE_BOOKS: Book3D[] = [
   { id: '48', title: 'Les Contemplations', author: 'Victor Hugo', genre: 'classique', thickness: 0.7, height: 2.1, coverColor: genreColor('classique', 3), shelf: 6, order: 8 },
 ]
 
-// ---------- Paramètres bibliothèque (7 étagères, ~100 livres) ----------
-const SHELF_COUNT = 7
-const SHELF_HEIGHTS = [2.4, 2.5, 2.6, 2.4, 2.5, 2.6, 2.4]
-const SHELF_THICKNESS = 0.15
-const SHELF_WIDTH = 11.0
-const SHELF_DEPTH = 1.6
-const CABINET_HEIGHT = SHELF_HEIGHTS.reduce((a, b) => a + b, 0) + SHELF_THICKNESS * (SHELF_COUNT + 1)
-const CABINET_DEPTH = SHELF_DEPTH + 0.25
-const GAP = 0.08
+// ========== Config étagères ==========
+// Valeurs par défaut (100 livres, SAMPLE_BOOKS). Surchargées par applyConfig().
+let SHELF_COUNT = 7
+let SHELF_HEIGHTS: number[] = [2.4, 2.5, 2.6, 2.4, 2.5, 2.6, 2.4]
+let SHELF_THICKNESS = 0.15
+let SHELF_WIDTH = 11.0
+let SHELF_DEPTH = 1.6
+let CABINET_HEIGHT = SHELF_HEIGHTS.reduce((a, b) => a + b, 0) + SHELF_THICKNESS * (SHELF_COUNT + 1)
+let CABINET_DEPTH = SHELF_DEPTH + 0.25
+let GAP = 0.08
+
+function applyConfig(capaciteMax: number) {
+  const st = 0.15
+  let shelves: number[], width: number
+  if (capaciteMax <= 40) {
+    shelves = [2.5, 2.6, 2.5]; width = 7.0         // Salon  (30)
+  } else if (capaciteMax <= 70) {
+    shelves = [2.4, 2.5, 2.6, 2.5, 2.4]; width = 8.5  // Bureau (50)
+  } else {
+    shelves = [2.4, 2.5, 2.6, 2.4, 2.5, 2.6, 2.4]; width = 11.0  // Chambre/Grenier (100)
+  }
+  SHELF_COUNT = shelves.length
+  SHELF_HEIGHTS = shelves
+  SHELF_WIDTH = width
+  CABINET_HEIGHT = shelves.reduce((a, b) => a + b, 0) + st * (shelves.length + 1)
+  CABINET_DEPTH = SHELF_DEPTH + 0.25
+}
 
 function shelfBottomY(index: number): number {
   let y = 0
@@ -246,7 +264,9 @@ function Livres({ books, onSelectBook, selectedId }: {
 
 // ---------- Scene principale ----------
 
-export default function BibliothequeScene({ className, bibliothequeId, ambianceId, onChange }: { className?: string; bibliothequeId?: number; ambianceId?: string; onChange?: () => void }) {
+export default function BibliothequeScene({ className, bibliothequeId, ambianceId, capaciteMax, onChange }: { className?: string; bibliothequeId?: number; ambianceId?: string; capaciteMax?: number; onChange?: () => void }) {
+  // Appliquer la config selon capacité
+  applyConfig(capaciteMax || 100)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selectedBook, setSelectedBook] = useState<Book3D | null>(null)
   const [books, setBooks] = useState<Book3D[]>(SAMPLE_BOOKS)

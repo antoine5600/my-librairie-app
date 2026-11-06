@@ -56,10 +56,10 @@ const BOOKS: BookSeed[] = [
 async function main() {
   // 1. Créer 4 bibliothèques avec ambiances différentes
   const bibliothequesData = [
-    { nom: 'Classique', slug: 'classique', ambiance: 'classique' },
-    { nom: 'Sombre', slug: 'sombre', ambiance: 'sombre' },
-    { nom: 'Clair', slug: 'clair', ambiance: 'clair' },
-    { nom: 'Rustique', slug: 'rustique', ambiance: 'rustique' },
+    { nom: 'Salon', slug: 'salon', ambiance: 'classique', capacite_max: 30 },
+    { nom: 'Bureau', slug: 'bureau', ambiance: 'sombre', capacite_max: 50 },
+    { nom: 'Chambre', slug: 'chambre', ambiance: 'clair', capacite_max: 100 },
+    { nom: 'Grenier', slug: 'grenier', ambiance: 'rustique', capacite_max: 100 },
   ]
 
   const biblioIds: number[] = []

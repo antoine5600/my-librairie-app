@@ -17,6 +17,7 @@ interface BiblioInfo {
   slug: string
   ambiance: string
   nombre_livres: number
+  capacite_max?: number
 }
 
 export default function Home() {
@@ -175,6 +176,7 @@ export default function Home() {
             className="w-full h-full"
             bibliothequeId={activeId ?? undefined}
             ambianceId={activeAmbiance}
+            capaciteMax={activeBiblio?.capacite_max}
             onChange={() => setRefreshKey(k => k + 1)}
           />
         </main>

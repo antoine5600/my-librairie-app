@@ -8,6 +8,7 @@ export const bibliotheques = sqliteTable('bibliotheques', {
   slug: text('slug').notNull().unique(),
   ambiance: text('ambiance').notNull().default('classique'), // classique, sombre, clair, rustique
   created_at: text('created_at').notNull().default("(datetime('now'))"),
+  capacite_max: integer('capacite_max').notNull().default(50),
 })
 
 // ---------- Livres ----------

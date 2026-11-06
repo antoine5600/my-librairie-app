@@ -19,6 +19,14 @@ async function main() {
   // Valeur par défaut pour les lignes existantes
   await db.run(`UPDATE livres_bibliotheques SET statut = 'present' WHERE statut IS NULL`)
 
+  // Ajouter capacite_max à la table bibliotheques
+  try {
+    await db.run(`ALTER TABLE bibliotheques ADD COLUMN capacite_max INTEGER NOT NULL DEFAULT 50`)
+    console.log('  ✅ Colonne capacite_max ajoutée')
+  } catch {
+    console.log('  ℹ️  Colonne capacite_max déjà présente')
+  }
+
   console.log('✅ Migration prêts terminée.')
   process.exit(0)
 }
