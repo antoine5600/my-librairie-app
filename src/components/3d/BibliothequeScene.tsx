@@ -128,6 +128,44 @@ function Plante() {
   )
 }
 
+function LampeBureau() {
+  return (
+    <group position={[-SHELF_WIDTH / 2 - 0.15, CABINET_HEIGHT + 0.05, 0.3]}>
+      <mesh position={[0, 0.1, 0]}><cylinderGeometry args={[0.15, 0.2, 0.2, 12]} /><meshStandardMaterial color="#374151" roughness={0.7} /></mesh>
+      <mesh position={[0, 0.3, 0]}><cylinderGeometry args={[0.04, 0.04, 0.25, 8]} /><meshStandardMaterial color="#6b7280" roughness={0.6} /></mesh>
+      <mesh position={[0, 0.5, 0]}><cylinderGeometry args={[0.25, 0.04, 0.3, 12]} /><meshStandardMaterial color="#9ca3af" roughness={0.5} /></mesh>
+    </group>
+  )
+}
+
+function VaseFleurs() {
+  return (
+    <group position={[-SHELF_WIDTH / 2 - 0.15, CABINET_HEIGHT + 0.1, 0.3]}>
+      <mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.12, 0.18, 0.25, 10]} /><meshStandardMaterial color="#e8d5c4" roughness={0.8} /></mesh>
+      <mesh position={[0, 0.35, 0]}><sphereGeometry args={[0.15, 6, 6]} /><meshStandardMaterial color="#f0a0b0" roughness={0.9} /></mesh>
+      <mesh position={[0.08, 0.4, 0.05]}><sphereGeometry args={[0.1, 6, 6]} /><meshStandardMaterial color="#e08090" roughness={0.9} /></mesh>
+    </group>
+  )
+}
+
+function Caisses() {
+  return (
+    <group position={[-SHELF_WIDTH / 2 - 0.15, CABINET_HEIGHT + 0.05, 0.3]}>
+      <mesh position={[0, 0.1, 0]}><boxGeometry args={[0.3, 0.2, 0.3]} /><meshStandardMaterial color="#6d4c41" roughness={0.8} /></mesh>
+      <mesh position={[0.15, 0.25, 0]}><boxGeometry args={[0.2, 0.15, 0.3]} /><meshStandardMaterial color="#8b6048" roughness={0.8} /></mesh>
+    </group>
+  )
+}
+
+function Decoration({ ambianceId }: { ambianceId?: string }) {
+  switch (ambianceId) {
+    case 'sombre': return <LampeBureau />
+    case 'clair': return <VaseFleurs />
+    case 'rustique': return <Caisses />
+    default: return <Plante />
+  }
+}
+
 function Boussole() {
   return (
     <group position={[SHELF_WIDTH / 2 + 0.15, CABINET_HEIGHT + 0.15, 0.3]}>
@@ -338,7 +376,7 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
 
         <Fond color={ambiance.fond} />
         <Mur color={ambiance.mur} />
-        <Plante />
+        <Decoration ambianceId={ambianceId} />
         <Boussole />
         <CadreBibliotheque bois={ambiance.bois} boisFonce={ambiance.boisFonce} />
         <Etageres boisEtagere={ambiance.boisEtagere} />
