@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
 import AjouterLivre from "@/components/AjouterLivre"
+import RechercheGlobale from "@/components/RechercheGlobale"
 import { AMBIANCES, AMBIANCE_LIST } from "@/components/3d/ambiances"
 
 const BibliothequeScene = dynamic(
@@ -80,6 +81,11 @@ export default function Home() {
         {/* Sidebar bibliothèques */}
         {sidebarOpen && (
           <aside className="w-56 shrink-0 bg-[#374151] border-r border-[#4f5a73] overflow-y-auto p-3 space-y-2">
+            {/* Recherche globale */}
+            <div className="mb-4">
+              <RechercheGlobale onNavigate={(biblioId) => { setActiveId(biblioId); setAddOpen(false) }} />
+            </div>
+
             <h2 className="text-[#9ca3af] text-xs font-semibold uppercase tracking-wider px-2 mb-3">
               Bibliothèques
             </h2>

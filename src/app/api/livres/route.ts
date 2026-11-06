@@ -1,10 +1,41 @@
 import { NextResponse } from 'next/server'
 import { db, schema } from '@/lib/db'
 
-// GET /api/livres — liste tous les livres (optionnel: ?bibliotheque_id=N)
+// GET /api/livres — liste tous les livres
+//   ?bibliotheque_id=N  → livres d'une bibliothèque
+//   ?q=...              → recherche globale (titre) avec bibliothèques
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const bibliothequeId = searchParams.get('bibliotheque_id')
+  const query = searchParams.get('q')
+
+  // Recherche globale
+  if (query && query.length >= 2) {
+    const pattern = `%${query}%`
+    const livres = await db.query.livres.findMany({
+      where: (l, { like, or }) => or(like(l.titre, pattern), like(l.auteur, pattern)),
+      orderBy: (l, { asc }) => [asc(l.titre)],
+    })
+
+    // Pour chaque livre, trouver ses bibliothèques
+    const result = await Promise.all(livres.map(async (livre) => {
+      const assoc = await db.query.livresBibliotheques.findMany({
+        where: (lb, { eq }) => eq(lb.livre_id, livre.id),
+        with: { bibliotheque: true },
+      })
+      return {
+        ...livre,
+        bibliotheques: assoc.map((a) => ({
+          id: a.bibliotheque.id,
+          nom: a.bibliotheque.nom,
+          ambiance: a.bibliotheque.ambiance,
+          association_id: a.id,
+        })),
+      }
+    }))
+
+    return NextResponse.json({ livres: result })
+  }
 
   if (bibliothequeId) {
     const id = Number(bibliothequeId)
