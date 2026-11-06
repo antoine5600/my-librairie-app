@@ -106,73 +106,6 @@ function shelfBottomY(index: number): number {
   return y
 }
 
-// ========== Décorations par ambiance ==========
-const nullDeco = null
-
-const DECORATIONS: Record<string, { left?: any; right?: any; floor?: any[] }> = {
-  classique: {    // Salon
-    left: { y: 0.1, z: 0.3, meshes: [
-      { type: 'cylinder', args: [0.2, 0.35, 0.4, 12], color: '#c0734f' },
-      { type: 'cylinder', pos: [0, 0.3, 0], args: [0.04, 0.04, 0.3, 6], color: '#5d7a3f' },
-      { type: 'sphere', pos: [0, 0.5, 0], args: [0.25, 8, 8], color: '#6d9a5f' },
-      { type: 'sphere', pos: [0.1, 0.55, 0.1], args: [0.15, 6, 6], color: '#7aaa5f' },
-    ]},
-    right: { y: 0.15, z: 0.3, meshes: [
-      { type: 'sphere', args: [0.08, 12, 12], color: '#d4a030' },
-      { type: 'cylinder', pos: [0, 0.12, 0], args: [0.02, 0.02, 0.15, 8], color: '#8f7f3f' },
-    ]},
-    floor: [
-      { x: 0, y: 0, z: 0.5, meshes: [
-        { type: 'box', args: [0.6, 0.1, 0.4], color: '#a1887f', h: 0.1 },
-      ]},
-    ],
-  },
-  sombre: {     // Bureau
-    left: { y: 0.05, z: 0.3, meshes: [
-      { type: 'cylinder', args: [0.15, 0.2, 0.25, 12], color: '#374151' },  // base lampe
-      { type: 'cylinder', pos: [0, 0.2, 0], args: [0.04, 0.04, 0.35, 8], color: '#6b7280' },  // tige
-      { type: 'cone', pos: [0, 0.4, 0], args: [0.25, 0.04, 0.3, 12], color: '#9ca3af' },  // abat-jour
-    ]},
-    right: { y: 0.1, z: 0.3, meshes: [
-      { type: 'sphere', args: [0.12, 16, 16], color: '#8e7f5f' },  // globe
-      { type: 'cylinder', pos: [0, -0.08, 0], args: [0.03, 0.05, 0.15, 8], color: '#6b7280' },  // pied globe
-    ]},
-    floor: [
-      { x: -1.5, y: 0, z: 0.8, meshes: [
-        { type: 'box', args: [0.6, 0.5, 0.5], color: '#4e342e', h: 0.5 },  // caisse
-      ]},
-    ],
-  },
-  clair: {      // Chambre
-    left: { y: 0.1, z: 0.3, meshes: [
-      { type: 'cylinder', args: [0.12, 0.18, 0.25, 10], color: '#e8d5c4' },  // vase
-      { type: 'sphere', pos: [0, 0.2, 0], args: [0.15, 6, 6], color: '#f0a0b0' },  // fleur 1
-      { type: 'sphere', pos: [0.08, 0.25, 0.05], args: [0.1, 6, 6], color: '#e08090' },  // fleur 2
-    ]},
-    right: { y: 0.1, z: 0.3, meshes: [
-      { type: 'cylinder', args: [0.06, 0.08, 0.15, 10], color: '#d4c8b0' },  // bougeoir
-      { type: 'cylinder', pos: [0, 0.1, 0], args: [0.015, 0.015, 0.12, 6], color: '#f5e6c8' },  // bougie
-      { type: 'sphere', pos: [0, 0.18, 0], args: [0.04, 6, 6], color: '#ffa500' },  // flamme
-    ]},
-  },
-  rustique: {   // Grenier
-    left: { y: 0.05, z: 0.3, meshes: [
-      { type: 'box', args: [0.3, 0.2, 0.3], color: '#6d4c41' },  // boîte
-      { type: 'box', pos: [0.15, 0.2, 0], args: [0.2, 0.15, 0.3], color: '#8b6048' },  // boîte 2
-    ]},
-    right: { y: 0.1, z: 0.3, meshes: [
-      { type: 'cylinder', args: [0.08, 0.12, 0.2, 10], color: '#a0826f' },  // pot
-      { type: 'cylinder', pos: [0, 0.15, 0], args: [0.02, 0.02, 0.15, 6], color: '#2d3436' },  // cire
-      { type: 'sphere', pos: [0.05, 0.25, 0], args: [0.05, 6, 6], color: '#ff8c00' },  // flamme
-    ]},
-    floor: [
-      { x: 1.5, y: 0, z: 0.6, meshes: [
-        { type: 'box', args: [1.0, 0.4, 0.6], color: '#5d4037', h: 0.4 },  // caisse
-      ]},
-    ],
-  },
-}
-
 // ---------- Composants ----------
 
 function Mur({ color }: { color: string }) {
@@ -184,46 +117,22 @@ function Mur({ color }: { color: string }) {
   )
 }
 
-function Decorations({ ambiance }: { ambiance: string }) {
-  const deco = DECORATIONS[ambiance] || DECORATIONS.classique
-  // Placer les éléments autour et sur la bibliothèque
+function Plante() {
   return (
-    <group>
-      {/* Élément gauche (dessus) */}
-      {deco.left && (
-        <group position={[-SHELF_WIDTH / 2 - 0.2, CABINET_HEIGHT + deco.left.y, deco.left.z || 0.3]}>
-          {deco.left.meshes.map((m: any, i: number) => {
-            const pos = m.pos ? (m.pos as [number, number, number]) : [0, 0, 0] as [number, number, number]
-            const color = m.color || '#c0734f'
-            if (m.type === 'sphere') return <mesh key={i} position={pos}><sphereGeometry args={m.args as [number, number, number]} /><meshStandardMaterial color={color} roughness={0.8} /></mesh>
-            if (m.type === 'cylinder') return <mesh key={i} position={pos}><cylinderGeometry args={m.args as [number, number, number, number]} /><meshStandardMaterial color={color} roughness={0.7} /></mesh>
-            return <mesh key={i} position={pos}><boxGeometry args={m.args as [number, number, number]} /><meshStandardMaterial color={color} roughness={0.7} /></mesh>
-          })}
-        </group>
-      )}
-      {/* Élément droit (dessus) */}
-      {deco.right && (
-        <group position={[SHELF_WIDTH / 2 + 0.2, CABINET_HEIGHT + deco.right.y, deco.right.z || 0.3]}>
-          {deco.right.meshes.map((m: any, i: number) => {
-            const pos = m.pos ? (m.pos as [number, number, number]) : [0, 0, 0] as [number, number, number]
-            const color = m.color || '#d4a030'
-            if (m.type === 'sphere') return <mesh key={i} position={pos}><sphereGeometry args={m.args as [number, number, number]} /><meshStandardMaterial color={color} roughness={0.3} metalness={0.4} /></mesh>
-            if (m.type === 'cylinder') return <mesh key={i} position={pos}><cylinderGeometry args={m.args as [number, number, number, number]} /><meshStandardMaterial color={color} roughness={0.7} /></mesh>
-            if (m.type === 'cone') return <mesh key={i} position={pos}><cylinderGeometry args={m.args as [number, number, number, number]} /><meshStandardMaterial color={color} roughness={0.6} /></mesh>
-            return <mesh key={i} position={pos}><boxGeometry args={m.args as [number, number, number]} /><meshStandardMaterial color={color} roughness={0.7} /></mesh>
-          })}
-        </group>
-      )}
-      {/* Élément sol (devant la bibliothèque) */}
-      {deco.floor && deco.floor.map((item: any, fi: number) => (
-        <group key={`f${fi}`} position={[item.x || 0, item.y || 0, item.z || SHELF_DEPTH / 2 + 0.2]}>
-          {item.meshes.map((m: any, i: number) => {
-            if (m.type === 'box') return <mesh key={i} position={[0, m.h / 2 || 0.15, 0]}><boxGeometry args={m.args as [number, number, number]} /><meshStandardMaterial color={m.color || '#8b6048'} roughness={0.8} /></mesh>
-            if (m.type === 'cylinder') return <mesh key={i} position={[0, (m.h || 0.3) / 2, 0]}><cylinderGeometry args={[m.r1 || 0.1, m.r2 || 0.1, m.h || 0.3, 8] as [number, number, number, number]} /><meshStandardMaterial color={m.color || '#6b7280'} roughness={0.7} /></mesh>
-            return nullDeco
-          })}
-        </group>
-      ))}
+    <group position={[-SHELF_WIDTH / 2 - 0.15, CABINET_HEIGHT + 0.1, 0.3]}>
+      <mesh position={[0, 0.3, 0]}><cylinderGeometry args={[0.2, 0.35, 0.4, 12]} /><meshStandardMaterial color="#c0734f" roughness={0.8} /></mesh>
+      <mesh position={[0, 0.6, 0]}><cylinderGeometry args={[0.04, 0.04, 0.3, 6]} /><meshStandardMaterial color="#5d7a3f" /></mesh>
+      <mesh position={[0, 0.8, 0]}><sphereGeometry args={[0.25, 8, 8]} /><meshStandardMaterial color="#6d9a5f" roughness={0.9} /></mesh>
+      <mesh position={[0.1, 0.85, 0.1]}><sphereGeometry args={[0.15, 6, 6]} /><meshStandardMaterial color="#7aaa5f" roughness={0.9} /></mesh>
+    </group>
+  )
+}
+
+function Boussole() {
+  return (
+    <group position={[SHELF_WIDTH / 2 + 0.15, CABINET_HEIGHT + 0.15, 0.3]}>
+      <mesh><sphereGeometry args={[0.08, 12, 12]} /><meshStandardMaterial color="#d4a030" roughness={0.3} metalness={0.4} /></mesh>
+      <mesh position={[0, 0.12, 0]}><cylinderGeometry args={[0.02, 0.02, 0.15, 8]} /><meshStandardMaterial color="#8f7f3f" /></mesh>
     </group>
   )
 }
@@ -429,7 +338,8 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
 
         <Fond color={ambiance.fond} />
         <Mur color={ambiance.mur} />
-        <Decorations ambiance={ambiance.id || 'classique'} />
+        <Plante />
+        <Boussole />
         <CadreBibliotheque bois={ambiance.bois} boisFonce={ambiance.boisFonce} />
         <Etageres boisEtagere={ambiance.boisEtagere} />
         <Livres
