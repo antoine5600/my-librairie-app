@@ -112,7 +112,7 @@ function Mur({ color }: { color: string }) {
   return (
     <mesh position={[0, CABINET_HEIGHT / 2, -CABINET_DEPTH / 2 - 0.3]}>
       <planeGeometry args={[CABINET_HEIGHT * 1.2, CABINET_HEIGHT + 2]} />
-      <meshStandardMaterial color={color} roughness={0.6} />
+      <meshBasicMaterial color={color} />
     </mesh>
   )
 }
