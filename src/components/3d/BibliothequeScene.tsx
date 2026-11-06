@@ -117,52 +117,122 @@ function Mur({ color }: { color: string }) {
   )
 }
 
-function Plante() {
+// ========== Décorations de scène ==========
+
+/** Tapis au sol devant la bibliothèque */
+function Tapis() {
   return (
-    <group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}>
-      <mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.15, 0.25, 0.3, 12]} /><meshStandardMaterial color="#c0734f" roughness={0.8} /></mesh>
-      <mesh position={[0, 0.4, 0]}><cylinderGeometry args={[0.04, 0.04, 0.25, 6]} /><meshStandardMaterial color="#5d7a3f" /></mesh>
-      <mesh position={[0, 0.6, 0]}><sphereGeometry args={[0.2, 8, 8]} /><meshStandardMaterial color="#6d9a5f" roughness={0.9} /></mesh>
+    <mesh position={[0, 0.01, SHELF_DEPTH + 0.8]} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={[SHELF_WIDTH * 0.7, 1.2]} />
+      <meshStandardMaterial color="#6b4c3f" roughness={0.9} />
+    </mesh>
+  )
+}
+
+function Fauteuil() {
+  return (
+    <group position={[SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.6]}>
+      <mesh position={[0, 0.15, 0]}><boxGeometry args={[0.5, 0.3, 0.3]} /><meshStandardMaterial color="#8b6048" roughness={0.8} /></mesh>
+      <mesh position={[0, 0.35, -0.15]}><boxGeometry args={[0.5, 0.4, 0.08]} /><meshStandardMaterial color="#a07050" roughness={0.8} /></mesh>
+      <mesh position={[-0.22, 0.25, 0]}><boxGeometry args={[0.06, 0.4, 0.3]} /><meshStandardMaterial color="#8b6048" roughness={0.8} /></mesh>
+      <mesh position={[0.22, 0.25, 0]}><boxGeometry args={[0.06, 0.4, 0.3]} /><meshStandardMaterial color="#8b6048" roughness={0.8} /></mesh>
     </group>
   )
 }
 
-function LampeBureau() {
+function TableBasse() {
   return (
-    <group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}>
-      <mesh position={[0, 0.12, 0]}><cylinderGeometry args={[0.12, 0.18, 0.25, 12]} /><meshStandardMaterial color="#374151" roughness={0.7} /></mesh>
-      <mesh position={[0, 0.35, 0]}><cylinderGeometry args={[0.04, 0.04, 0.3, 8]} /><meshStandardMaterial color="#6b7280" roughness={0.6} /></mesh>
-      <mesh position={[0, 0.55, 0]}><cylinderGeometry args={[0.2, 0.04, 0.25, 12]} /><meshStandardMaterial color="#9ca3af" roughness={0.5} /></mesh>
+    <group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.7]}>
+      <mesh position={[0, 0.2, 0]}><boxGeometry args={[0.4, 0.05, 0.3]} /><meshStandardMaterial color="#6b4c3f" roughness={0.7} /></mesh>
+      <mesh position={[-0.15, 0.1, -0.1]}><cylinderGeometry args={[0.03, 0.04, 0.2, 6]} /><meshStandardMaterial color="#5d4037" roughness={0.8} /></mesh>
+      <mesh position={[0.15, 0.1, -0.1]}><cylinderGeometry args={[0.03, 0.04, 0.2, 6]} /><meshStandardMaterial color="#5d4037" roughness={0.8} /></mesh>
+      <mesh position={[-0.15, 0.1, 0.1]}><cylinderGeometry args={[0.03, 0.04, 0.2, 6]} /><meshStandardMaterial color="#5d4037" roughness={0.8} /></mesh>
+      <mesh position={[0.15, 0.1, 0.1]}><cylinderGeometry args={[0.03, 0.04, 0.2, 6]} /><meshStandardMaterial color="#5d4037" roughness={0.8} /></mesh>
     </group>
   )
 }
 
-function VaseFleurs() {
+function PetiteTable() {
   return (
-    <group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}>
-      <mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.1, 0.15, 0.25, 10]} /><meshStandardMaterial color="#e8d5c4" roughness={0.8} /></mesh>
-      <mesh position={[0, 0.35, 0]}><sphereGeometry args={[0.15, 6, 6]} /><meshStandardMaterial color="#f0a0b0" roughness={0.9} /></mesh>
-      <mesh position={[0.08, 0.4, 0.05]}><sphereGeometry args={[0.1, 6, 6]} /><meshStandardMaterial color="#e08090" roughness={0.9} /></mesh>
+    <group position={[SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.6]}>
+      <mesh position={[0, 0.25, 0]}><boxGeometry args={[0.3, 0.04, 0.25]} /><meshStandardMaterial color="#374151" roughness={0.6} /></mesh>
+      <mesh position={[0, 0.12, 0]}><cylinderGeometry args={[0.03, 0.03, 0.25, 6]} /><meshStandardMaterial color="#4a5568" roughness={0.7} /></mesh>
     </group>
   )
 }
 
-function Caisses() {
+function Lit() {
   return (
-    <group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}>
-      <mesh position={[0.05, 0.12, 0]}><boxGeometry args={[0.25, 0.25, 0.25]} /><meshStandardMaterial color="#6d4c41" roughness={0.8} /></mesh>
-      <mesh position={[-0.1, 0.25, 0]}><boxGeometry args={[0.2, 0.15, 0.25]} /><meshStandardMaterial color="#8b6048" roughness={0.8} /></mesh>
+    <group position={[SHELF_WIDTH / 4, 0, SHELF_DEPTH + 0.4]}>
+      <mesh position={[0, 0.15, 0]}><boxGeometry args={[1.2, 0.1, 0.6]} /><meshStandardMaterial color="#5d4037" roughness={0.7} /></mesh>
+      <mesh position={[0, 0.25, 0]}><boxGeometry args={[1.1, 0.1, 0.5]} /><meshStandardMaterial color="#d4c8b0" roughness={0.9} /></mesh>
+      <mesh position={[0, 0.35, 0]}><boxGeometry args={[1.0, 0.15, 0.4]} /><meshStandardMaterial color="#e8dcc8" roughness={0.9} /></mesh>
+      <mesh position={[-0.55, 0.08, -0.25]}><cylinderGeometry args={[0.04, 0.06, 0.2, 6]} /><meshStandardMaterial color="#5d4037" roughness={0.8} /></mesh>
+      <mesh position={[0.55, 0.08, -0.25]}><cylinderGeometry args={[0.04, 0.06, 0.2, 6]} /><meshStandardMaterial color="#5d4037" roughness={0.8} /></mesh>
+      <mesh position={[-0.55, 0.08, 0.25]}><cylinderGeometry args={[0.04, 0.06, 0.2, 6]} /><meshStandardMaterial color="#5d4037" roughness={0.8} /></mesh>
+      <mesh position={[0.55, 0.08, 0.25]}><cylinderGeometry args={[0.04, 0.06, 0.2, 6]} /><meshStandardMaterial color="#5d4037" roughness={0.8} /></mesh>
     </group>
   )
 }
 
-function Decoration({ ambianceId }: { ambianceId?: string }) {
-  switch (ambianceId) {
-    case 'sombre': return <LampeBureau />
-    case 'clair': return <VaseFleurs />
-    case 'rustique': return <Caisses />
-    default: return <Plante />
-  }
+function BibliothequeGrenier() {
+  return (
+    <group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}>
+      <mesh position={[0, 0.12, 0]}><boxGeometry args={[0.35, 0.25, 0.35]} /><meshStandardMaterial color="#4e342e" roughness={0.9} /></mesh>
+      <mesh position={[-0.1, 0.35, 0]}><boxGeometry args={[0.25, 0.15, 0.3]} /><meshStandardMaterial color="#5d4037" roughness={0.9} /></mesh>
+      <mesh position={[0.1, 0.4, 0]}><boxGeometry args={[0.15, 0.2, 0.2]} /><meshStandardMaterial color="#6d4c41" roughness={0.9} /></mesh>
+    </group>
+  )
+}
+
+function Chat() {
+  return (
+    <group position={[SHELF_WIDTH / 3, 0.02, SHELF_DEPTH + 1.0]}>
+      <mesh position={[0, 0.06, 0]}><sphereGeometry args={[0.08, 8, 8]} /><meshStandardMaterial color="#f0e0d0" roughness={0.9} /></mesh>
+      <mesh position={[0.08, 0.1, 0]}><sphereGeometry args={[0.05, 8, 8]} /><meshStandardMaterial color="#f0e0d0" roughness={0.9} /></mesh>
+      <mesh position={[0.04, 0.06, 0.04]}><sphereGeometry args={[0.02, 6, 6]} /><meshStandardMaterial color="#2d3436" roughness={0.9} /></mesh>
+    </group>
+  )
+}
+
+// Petites décos réutilisées
+function Plante() { return (<group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}><mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.15, 0.25, 0.3, 12]} /><meshStandardMaterial color="#c0734f" roughness={0.8} /></mesh><mesh position={[0, 0.4, 0]}><cylinderGeometry args={[0.04, 0.04, 0.25, 6]} /><meshStandardMaterial color="#5d7a3f" /></mesh><mesh position={[0, 0.6, 0]}><sphereGeometry args={[0.2, 8, 8]} /><meshStandardMaterial color="#6d9a5f" roughness={0.9} /></mesh></group>) }
+function LampeBureau() { return (<group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}><mesh position={[0, 0.12, 0]}><cylinderGeometry args={[0.12, 0.18, 0.25, 12]} /><meshStandardMaterial color="#374151" roughness={0.7} /></mesh><mesh position={[0, 0.35, 0]}><cylinderGeometry args={[0.04, 0.04, 0.3, 8]} /><meshStandardMaterial color="#6b7280" roughness={0.6} /></mesh><mesh position={[0, 0.55, 0]}><cylinderGeometry args={[0.2, 0.04, 0.25, 12]} /><meshStandardMaterial color="#9ca3af" roughness={0.5} /></mesh></group>) }
+function VaseFleurs() { return (<group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}><mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.1, 0.15, 0.25, 10]} /><meshStandardMaterial color="#e8d5c4" roughness={0.8} /></mesh><mesh position={[0, 0.35, 0]}><sphereGeometry args={[0.15, 6, 6]} /><meshStandardMaterial color="#f0a0b0" roughness={0.9} /></mesh><mesh position={[0.08, 0.4, 0.05]}><sphereGeometry args={[0.1, 6, 6]} /><meshStandardMaterial color="#e08090" roughness={0.9} /></mesh></group>) }
+function Caisses() { return (<group position={[-SHELF_WIDTH / 3, 0, SHELF_DEPTH + 0.5]}><mesh position={[0.05, 0.12, 0]}><boxGeometry args={[0.25, 0.25, 0.25]} /><meshStandardMaterial color="#6d4c41" roughness={0.8} /></mesh><mesh position={[-0.1, 0.25, 0]}><boxGeometry args={[0.2, 0.15, 0.25]} /><meshStandardMaterial color="#8b6048" roughness={0.8} /></mesh></group>) }
+
+function SceneDecor({ ambianceId }: { ambianceId?: string }) {
+  return (
+    <group>
+      <Tapis />
+      {ambianceId === 'sombre' && (
+        <>
+          <LampeBureau />
+          <PetiteTable />
+        </>
+      )}
+      {ambianceId === 'clair' && (
+        <>
+          <VaseFleurs />
+          <Lit />
+        </>
+      )}
+      {ambianceId === 'rustique' && (
+        <>
+          <Caisses />
+          <BibliothequeGrenier />
+        </>
+      )}
+      {(!ambianceId || ambianceId === 'classique') && (
+        <>
+          <Plante />
+          <Fauteuil />
+          <TableBasse />
+          <Chat />
+        </>
+      )}
+    </group>
+  )
 }
 
 function Boussole() {
@@ -375,7 +445,7 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
 
         <Fond color={ambiance.fond} />
         <Mur color={ambiance.mur} />
-        <Decoration ambianceId={ambianceId} />
+        <SceneDecor ambianceId={ambianceId} />
         <Boussole />
         <CadreBibliotheque bois={ambiance.bois} boisFonce={ambiance.boisFonce} />
         <Etageres boisEtagere={ambiance.boisEtagere} />
