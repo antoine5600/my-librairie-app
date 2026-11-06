@@ -34,38 +34,45 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
     2: { count: 0, totalWidth: 0 },
     3: { count: 0, totalWidth: 0 },
   })
-  const livresExistants = useRef<Array<{ titre: string; isbn?: string | null }>>([])
+  const livresExistants = useRef<Array<{ titre: string; isbn?: string | null; biblio?: string }>>([])
+  const [matchLibraries, setMatchLibraries] = useState<string[]>([])
 
-  // Focus input + calculer l'espace dispo sur chaque étagère
+  // Focus input + charger les livres de toutes les bibliothèques (pour détection doublon)
   useEffect(() => {
     inputRef.current?.focus()
-    fetch(`/api/bibliotheques/${bibliothequeId}`)
+    // 1. Récup la liste des bibliothèques
+    fetch('/api/bibliotheques')
       .then(r => r.json())
       .then(data => {
-        const livres: any[] = data.bibliotheque?.livres || []
-        const dispo: Record<number, { count: number; totalWidth: number }> = {
-          0: { count: 0, totalWidth: 0 },
-          1: { count: 0, totalWidth: 0 },
-          2: { count: 0, totalWidth: 0 },
-          3: { count: 0, totalWidth: 0 },
-        }
-        for (const l of livres) {
-          const shelf = l.etagere ?? 0
-          if (dispo[shelf]) {
-            dispo[shelf].count++
-            dispo[shelf].totalWidth += (l.epaisseur ?? 0.6) + 0.08
+        const biblioList: Array<{ id: number; nom: string }> = data.bibliotheques || []
+        // 2. Pour chaque biblio, récup ses livres
+        Promise.all(biblioList.map((b) =>
+          fetch(`/api/bibliotheques/${b.id}`).then(r => r.json())
+        )).then((results) => {
+          const dispo: Record<number, { count: number; totalWidth: number }> = {
+            0: { count: 0, totalWidth: 0 }, 1: { count: 0, totalWidth: 0 },
+            2: { count: 0, totalWidth: 0 }, 3: { count: 0, totalWidth: 0 },
           }
-        }
-        livresExistants.current = livres.map((l: any) => ({ titre: l.titre || '', isbn: l.isbn || null }))
-        // Trier : étagère avec le moins de largeur utilisée en premier
-        const sorted = Object.entries(dispo).sort(([, a], [, b]) => a.totalWidth - b.totalWidth)
-        etagereDispo.current = {
-          0: dispo[0],
-          1: dispo[1],
-          2: dispo[2],
-          3: dispo[3],
-          sorted, // on garde l'ordre trié
-        } as any
+          const tous: Array<{ titre: string; isbn?: string | null; biblio?: string }> = []
+
+          for (const res of results) {
+            const livres: any[] = res.bibliotheque?.livres || []
+            const nom = biblioList.find((b) => b.id === res.bibliotheque?.id)?.nom || '?'
+
+            for (const l of livres) {
+              tous.push({ titre: l.titre || '', isbn: l.isbn || null, biblio: nom })
+              const shelf = l.etagere ?? 0
+              if (dispo[shelf]) {
+                dispo[shelf].count++
+                dispo[shelf].totalWidth += (l.epaisseur ?? 0.6) + 0.08
+              }
+            }
+          }
+
+          livresExistants.current = tous
+          const sorted = Object.entries(dispo).sort(([, a], [, b]) => a.totalWidth - b.totalWidth)
+          etagereDispo.current = { 0: dispo[0], 1: dispo[1], 2: dispo[2], 3: dispo[3], sorted } as any
+        })
       })
       .catch(() => {})
   }, [bibliothequeId])
@@ -116,13 +123,25 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
     setQuery(`${s.titre} — ${s.auteur}`)
     setError('')
 
-    // Détection doublon
+    // Détection doublon (toutes bibliothèques)
     setDuplicateDetected(false)
     setForceAdd(false)
+    setMatchLibraries([])
     const existing = livresExistants.current
-    const matchIsbn = s.isbn && existing.some((l) => l.isbn === s.isbn)
-    const matchTitle = existing.some((l) => l.titre.toLowerCase().trim() === s.titre.toLowerCase().trim())
-    if (matchIsbn || matchTitle) setDuplicateDetected(true)
+
+    // Par ISBN
+    let matches: string[] = []
+    if (s.isbn) matches = existing.filter((l) => l.isbn === s.isbn).map((l) => l.biblio || '').filter(Boolean)
+    // Par titre si pas d'ISBN ou pas trouvé par ISBN
+    if (matches.length === 0) {
+      matches = existing.filter((l) => l.titre.toLowerCase().trim() === s.titre.toLowerCase().trim()).map((l) => l.biblio || '').filter(Boolean)
+    }
+    // Dédupliquer les noms
+    const uniq = [...new Set(matches)]
+    if (uniq.length > 0) {
+      setDuplicateDetected(true)
+      setMatchLibraries(uniq)
+    }
   }
 
   const handleAdd = async () => {
@@ -244,11 +263,13 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
               </div>
               {/* Alerte doublon */}
               {duplicateDetected && !forceAdd && (
-                <div className="mt-2 flex items-center gap-3 p-2 rounded-lg bg-yellow-900/20 border border-yellow-600">
-                  <span className="text-yellow-400 text-base">⚠️</span>
+                <div className="mt-2 flex items-start gap-3 p-2 rounded-lg bg-yellow-900/20 border border-yellow-600">
+                  <span className="text-yellow-400 text-base shrink-0">⚠️</span>
                   <div className="min-w-0">
-                    <p className="text-yellow-300 text-xs font-semibold">Ce livre semble déjà présent</p>
-                    <p className="text-[#9ca3af] text-[10px]">ISBN ou titre identique trouvé dans cette bibliothèque.</p>
+                    <p className="text-yellow-300 text-xs font-semibold">Ce livre existe déjà</p>
+                    <p className="text-[#9ca3af] text-[10px]">
+                      Dans : {matchLibraries.length > 0 ? matchLibraries.join(', ') : 'cette bibliothèque'}
+                    </p>
                   </div>
                 </div>
               )}
