@@ -154,7 +154,7 @@ export default function Home() {
                                                 )}
                                               </div>
                                             ))}
-                            </aside>
+                                                          </aside>
         )}
 
         {/* Scene 3D */}
