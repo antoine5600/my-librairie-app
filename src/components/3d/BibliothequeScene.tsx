@@ -274,6 +274,7 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
           coverColor: l.couleur_dos || genreColor(l.genre || 'classique', i),
           shelf: l.etagere ?? 0,
           order: Math.floor(l.position_x / 0.6) || i,
+          associationId: l.association_id,
         }))
         setBooks(loaded)
       })
@@ -340,9 +341,43 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
       </Canvas>
 
       {selectedBook && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-amber-900/85 text-white rounded-xl px-5 py-2.5 shadow-xl border border-amber-700 max-w-sm text-center backdrop-blur-sm">
-          <p className="font-bold text-sm tracking-tight">{selectedBook.title}</p>
-          <p className="text-amber-300 text-[11px]">{selectedBook.author}</p>
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-amber-850/85 text-white rounded-xl px-5 py-2.5 shadow-xl border border-amber-700 max-w-sm backdrop-blur-sm flex items-center gap-4">
+          <div className="text-center leading-tight min-w-0 flex-1">
+            <p className="font-bold text-sm tracking-tight">{selectedBook.title}</p>
+            <p className="text-amber-300 text-[11px]">{selectedBook.author}</p>
+          </div>
+          {selectedBook.associationId && bibliothequeId && (
+            <button
+              onClick={async () => {
+                try {
+                  await fetch(`/api/bibliotheques/${bibliothequeId}/livres`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ association_id: selectedBook.associationId }),
+                  })
+                  setSelectedId(null)
+                  setSelectedBook(null)
+                  // Recharger les livres après suppression
+                  const res = await fetch(`/api/bibliotheques/${bibliothequeId}`)
+                  const data = await res.json()
+                  const b = data.bibliotheque
+                  const loaded: Book3D[] = (b.livres || []).map((l: any, i: number) => ({
+                    id: String(l.id), title: l.titre, author: l.auteur,
+                    genre: l.genre || 'classique', thickness: l.epaisseur ?? 0.6,
+                    height: l.hauteur ?? 2.0,
+                    coverColor: l.couleur_dos || genreColor(l.genre || 'classique', i),
+                    shelf: l.etagere ?? 0, order: Math.floor(l.position_x / 0.6) || i,
+                    associationId: l.association_id,
+                  }))
+                  setBooks(loaded)
+                } catch {}
+              }}
+              className="px-3 py-1.5 text-xs text-white bg-red-600 hover:bg-red-700 rounded-lg shrink-0 transition-colors"
+              title="Retirer ce livre de la bibliothèque"
+            >
+              Retirer
+            </button>
+          )}
         </div>
       )}
     </div>

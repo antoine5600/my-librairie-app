@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db, schema } from '@/lib/db'
+import { and, eq } from 'drizzle-orm'
 
 // POST /api/bibliotheques/[id]/livres — associe un livre existant à la bibliothèque
 export async function POST(
@@ -51,4 +52,35 @@ export async function POST(
     .returning()
 
   return NextResponse.json({ association: inserted[0] }, { status: 201 })
+}
+
+// DELETE /api/bibliotheques/[id]/livres — retire l'association (livre de la bibliothèque)
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: idStr } = await params
+  const biblioId = Number(idStr)
+  if (!Number.isInteger(biblioId)) {
+    return NextResponse.json({ error: 'ID bibliothèque invalide.' }, { status: 400 })
+  }
+
+  const body = await req.json().catch(() => null)
+  const associationId = Number(body?.association_id)
+
+  if (!Number.isInteger(associationId)) {
+    return NextResponse.json({ error: 'association_id est requis.' }, { status: 400 })
+  }
+
+  const deleted = await db.delete(schema.livresBibliotheques)
+    .where(
+      and(eq(schema.livresBibliotheques.id, associationId), eq(schema.livresBibliotheques.bibliotheque_id, biblioId))
+    )
+    .returning()
+
+  if (!deleted[0]) {
+    return NextResponse.json({ error: 'Association introuvable.' }, { status: 404 })
+  }
+
+  return NextResponse.json({ success: true })
 }
