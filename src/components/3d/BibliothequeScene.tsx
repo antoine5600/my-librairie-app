@@ -275,6 +275,8 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
           shelf: l.etagere ?? 0,
           order: Math.floor(l.position_x / 0.6) || i,
           associationId: l.association_id,
+          statut: l.statut || 'present',
+          emprunteur: l.emprunteur,
         }))
         setBooks(loaded)
       })
@@ -282,7 +284,24 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
       .finally(() => setLoading(false))
   }, [bibliothequeId])
 
-  const currentBooks = books.length > 0 ? books : SAMPLE_BOOKS
+  const currentBooks = books.length > 0 ? books.filter((b) => !b.statut || b.statut === 'present') : SAMPLE_BOOKS
+
+  // Helper recharger les livres de la bibliothèque courante
+  const reloadBooks = async (biblioId: number): Promise<Book3D[]> => {
+    const res = await fetch(`/api/bibliotheques/${biblioId}`)
+    const data = await res.json()
+    const b = data.bibliotheque
+    return (b.livres || []).map((l: any, i: number) => ({
+      id: String(l.id), title: l.titre, author: l.auteur,
+      genre: l.genre || 'classique', thickness: l.epaisseur ?? 0.6,
+      height: l.hauteur ?? 2.0,
+      coverColor: l.couleur_dos || genreColor(l.genre || 'classique', i),
+      shelf: l.etagere ?? 0, order: Math.floor(l.position_x / 0.6) || i,
+      associationId: l.association_id,
+      statut: l.statut || 'present',
+      emprunteur: l.emprunteur,
+    }))
+  }
 
   const handleSelectBook = (id: string) => {
     setSelectedId(id === selectedId ? null : id)
@@ -341,43 +360,79 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
       </Canvas>
 
       {selectedBook && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-amber-850/85 text-white rounded-xl px-5 py-2.5 shadow-xl border border-amber-700 max-w-sm backdrop-blur-sm flex items-center gap-4">
-          <div className="text-center leading-tight min-w-0 flex-1">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-amber-850/85 text-white rounded-xl px-4 py-2.5 shadow-xl border border-amber-700 max-w-xs backdrop-blur-sm flex flex-col items-center gap-2">
+          <div className="text-center leading-tight min-w-0 w-full">
             <p className="font-bold text-sm tracking-tight">{selectedBook.title}</p>
             <p className="text-amber-300 text-[11px]">{selectedBook.author}</p>
+            {selectedBook.emprunteur && (
+              <p className="text-yellow-400 text-[10px] mt-0.5">📤 Prêté à {selectedBook.emprunteur}</p>
+            )}
           </div>
-          {selectedBook.associationId && bibliothequeId && (
-            <button
-              onClick={async () => {
-                try {
-                  await fetch(`/api/bibliotheques/${bibliothequeId}/livres`, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ association_id: selectedBook.associationId }),
-                  })
-                  setSelectedId(null)
-                  setSelectedBook(null)
-                  // Recharger les livres après suppression
-                  const res = await fetch(`/api/bibliotheques/${bibliothequeId}`)
-                  const data = await res.json()
-                  const b = data.bibliotheque
-                  const loaded: Book3D[] = (b.livres || []).map((l: any, i: number) => ({
-                    id: String(l.id), title: l.titre, author: l.auteur,
-                    genre: l.genre || 'classique', thickness: l.epaisseur ?? 0.6,
-                    height: l.hauteur ?? 2.0,
-                    coverColor: l.couleur_dos || genreColor(l.genre || 'classique', i),
-                    shelf: l.etagere ?? 0, order: Math.floor(l.position_x / 0.6) || i,
-                    associationId: l.association_id,
-                  }))
-                  setBooks(loaded)
-                } catch {}
-              }}
-              className="px-3 py-1.5 text-xs text-white bg-red-600 hover:bg-red-700 rounded-lg shrink-0 transition-colors"
-              title="Retirer ce livre de la bibliothèque"
-            >
-              Retirer
-            </button>
-          )}
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            {selectedBook.associationId && bibliothequeId && (
+              selectedBook.statut === 'prete' ? (
+                <button
+                  onClick={async () => {
+                    try {
+                      await fetch(`/api/bibliotheques/${bibliothequeId}/livres`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ association_id: selectedBook.associationId, statut: 'present' }),
+                      })
+                      reloadBooks(bibliothequeId).then(setBooks)
+                      setSelectedId(null); setSelectedBook(null)
+                    } catch {}
+                  }}
+                  className="px-3 py-1.5 text-xs text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                >
+                  📥 Récupérer
+                </button>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <input
+                    id={`pret-input-${selectedBook.id}`}
+                    placeholder="Prêté à…"
+                    className="w-20 bg-[#1f2937] text-white rounded px-2 py-1 text-[10px] border border-[#4f5a73] outline-none placeholder-[#6b7280]"
+                  />
+                  <button
+                    onClick={async () => {
+                      const nom = document.getElementById(`pret-input-${selectedBook.id}`) as HTMLInputElement
+                      try {
+                        await fetch(`/api/bibliotheques/${bibliothequeId}/livres`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ association_id: selectedBook.associationId, statut: 'prete', emprunteur: nom?.value || '' }),
+                        })
+                        reloadBooks(bibliothequeId).then(setBooks)
+                        setSelectedId(null); setSelectedBook(null)
+                      } catch {}
+                    }}
+                    className="px-3 py-1.5 text-xs text-white bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
+                  >
+                    📤 Prêter
+                  </button>
+                </div>
+              )
+            )}
+            {selectedBook.associationId && bibliothequeId && selectedBook.statut !== 'prete' && (
+              <button
+                onClick={async () => {
+                  try {
+                    await fetch(`/api/bibliotheques/${bibliothequeId}/livres`, {
+                      method: 'DELETE',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ association_id: selectedBook.associationId }),
+                    })
+                    reloadBooks(bibliothequeId).then(setBooks)
+                    setSelectedId(null); setSelectedBook(null)
+                  } catch {}
+                }}
+                className="px-3 py-1.5 text-xs text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+              >
+                ✕ Retirer
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

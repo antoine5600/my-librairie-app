@@ -35,6 +35,8 @@ export const livresBibliotheques = sqliteTable('livres_bibliotheques', {
   etagere: integer('etagere').notNull().default(0),
   position_x: real('position_x').notNull().default(0),
   position_y: real('position_y').notNull().default(0),
+  statut: text('statut').notNull().default('present'),
+  emprunteur: text('emprunteur'),
   created_at: text('created_at').notNull().default("(datetime('now'))"),
 })
 

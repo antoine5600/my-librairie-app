@@ -13,6 +13,10 @@ export interface Book3D {
   /** Position sur l'étagère */
   shelf: number
   order: number
-  /** ID de l'association dans livres_bibliotheques (pour suppression) */
+  /** ID de l'association dans livres_bibliotheques (pour suppression/prêt) */
   associationId?: number
+  /** Statut : present | prete */
+  statut?: string
+  /** Nom de l'emprunteur si prêté */
+  emprunteur?: string | null
 }

@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "db:init": "npx tsx src/lib/db/init.ts",
-    "db:seed": "npx tsx src/lib/db/seed.ts"
+    "db:seed": "npx tsx src/lib/db/seed.ts",
+    "db:migrate-prets": "npx tsx src/lib/db/migrate-prets.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

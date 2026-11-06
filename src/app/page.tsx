@@ -25,6 +25,7 @@ export default function Home() {
   const [addOpen, setAddOpen] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [prets, setPrets] = useState<Array<{ titre: string; emprunteur?: string }>>([])
 
   // Charger la liste des bibliothèques
   useEffect(() => {
@@ -36,7 +37,17 @@ export default function Home() {
         if (!activeId && list.length > 0) setActiveId(list[0].id)
       })
       .catch(() => {})
-  }, [refreshKey])
+    // Charger les prêtés de la bibliothèque active
+    if (activeId) {
+      fetch(`/api/bibliotheques/${activeId}`)
+        .then(r => r.json())
+        .then(data => {
+          const livres: any[] = data.bibliotheque?.livres || []
+          setPrets(livres.filter((l: any) => l.statut === 'prete').map((l: any) => ({ titre: l.titre, emprunteur: l.emprunteur })))
+        })
+        .catch(() => {})
+    }
+  }, [refreshKey, activeId])
 
   const activeBiblio = bibliotheques.find(b => b.id === activeId)
   const activeAmbiance = activeBiblio?.ambiance || "classique"
@@ -106,10 +117,25 @@ export default function Home() {
                     style={{ background: amb.bois }}
                   />
                   <span className="truncate">{b.nom}</span>
-                </button>
-              )
-            })}
-          </aside>
+                                  </button>
+                                )
+                              })}
+
+                              {/* Livres prêtés */}
+                              {prets.length > 0 && (
+                                <>
+                                  <h2 className="text-[#9ca3af] text-xs font-semibold uppercase tracking-wider px-2 mt-4 mb-2">
+                                    📤 Prêtés ({prets.length})
+                                  </h2>
+                                  {prets.map((p, i) => (
+                                    <div key={i} className="px-3 py-2 text-xs text-[#d1d5db] border-b border-[#4f5a73]/30 last:border-b-0">
+                                      <p className="font-medium truncate">{p.titre}</p>
+                                      {p.emprunteur && <p className="text-[#9ca3af] text-[10px] mt-0.5">→ {p.emprunteur}</p>}
+                                    </div>
+                                  ))}
+                                </>
+                              )}
+                            </aside>
         )}
 
         {/* Scene 3D */}

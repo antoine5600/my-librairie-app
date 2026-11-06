@@ -34,6 +34,8 @@ export async function GET(
     etagere: a.etagere,
     position_x: a.position_x,
     position_y: a.position_y,
+    statut: a.statut || 'present',
+    emprunteur: a.emprunteur,
     association_id: a.id,
   }))
 

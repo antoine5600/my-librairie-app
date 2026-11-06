@@ -84,3 +84,43 @@ export async function DELETE(
 
   return NextResponse.json({ success: true })
 }
+
+// PUT /api/bibliotheques/[id]/livres — prêter ou récupérer (statut)
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: idStr } = await params
+  const biblioId = Number(idStr)
+  if (!Number.isInteger(biblioId)) {
+    return NextResponse.json({ error: 'ID bibliothèque invalide.' }, { status: 400 })
+  }
+
+  const body = await req.json().catch(() => null)
+  const associationId = Number(body?.association_id)
+  if (!Number.isInteger(associationId)) {
+    return NextResponse.json({ error: 'association_id requis.' }, { status: 400 })
+  }
+
+  const statut = body?.statut as string
+  if (statut !== 'present' && statut !== 'prete') {
+    return NextResponse.json({ error: 'statut invalide (present/prete).' }, { status: 400 })
+  }
+
+  const updates: Record<string, string | null> = { statut }
+  if (statut === 'prete') updates.emprunteur = (body?.emprunteur as string)?.trim() || null
+  else updates.emprunteur = null
+
+  const updated = await db.update(schema.livresBibliotheques)
+    .set(updates)
+    .where(
+      and(eq(schema.livresBibliotheques.id, associationId), eq(schema.livresBibliotheques.bibliotheque_id, biblioId))
+    )
+    .returning()
+
+  if (!updated[0]) {
+    return NextResponse.json({ error: 'Association introuvable.' }, { status: 404 })
+  }
+
+  return NextResponse.json({ association: updated[0] })
+}
