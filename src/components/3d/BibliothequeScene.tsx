@@ -325,15 +325,22 @@ function Livres({ books, onSelectBook, selectedId, draggingId, dragTarget, onDra
   return (
     <group>
       {booksByShelf.map((shelfBooks, shelfIndex) => {
-        const sorted = [...shelfBooks].sort((a, b) => a.order - b.order)
-        let cursorX = -SHELF_WIDTH / 2 + 0.25
         const baseY = shelfBottomY(shelfIndex) + SHELF_THICKNESS + 0.04
 
-        return sorted.map((book) => {
-          const depthOffset = (Math.sin(book.order * 2.7) * 0.08)
-          const x = cursorX + book.thickness / 2
+        return shelfBooks.map((book) => {
+          // Placement libre par positionX — ou fallback ordre séquentiel
+          let x: number
+          if (typeof book.positionX === 'number') {
+            x = -SHELF_WIDTH / 2 + 0.25 + book.positionX + book.thickness / 2
+          } else {
+            // Fallback séquentiel pour anciennes données / SAMPLE_BOOKS
+            const sorted = [...shelfBooks].filter(b => !b.positionX && b.order !== undefined).sort((a, b) => a.order - b.order)
+            const idx = sorted.findIndex(b => b.id === book.id)
+            x = -SHELF_WIDTH / 2 + 0.25 + (idx >= 0 ? sorted.slice(0, idx).reduce((s, b) => s + b.thickness + GAP, 0) : 0) + book.thickness / 2
+          }
+
+          const depthOffset = (typeof book.positionX === 'number' ? Math.sin(book.positionX * 5) : Math.sin(book.order * 2.7)) * 0.08
           const pos: [number, number, number] = [x, baseY, depthOffset]
-          cursorX += book.thickness + GAP
 
           return (
             <Livre3D
@@ -354,7 +361,7 @@ function Livres({ books, onSelectBook, selectedId, draggingId, dragTarget, onDra
           )
         })
       })}
-      {/* Livre en cours de glissement — suit le curseur */}
+      {/* Livre en cours de glissement */}
       {draggingId && dragTarget && (() => {
         const book = books.find(b => b.id === draggingId)
         if (!book) return null
@@ -413,6 +420,7 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
           coverColor: l.couleur_dos || genreColor(l.genre || 'classique', i),
           shelf: l.etagere ?? 0,
           order: Math.floor(l.position_x / 0.6) || i,
+          positionX: typeof l.position_x === 'number' ? l.position_x : undefined,
           associationId: l.association_id,
           statut: l.statut || 'present',
           emprunteur: l.emprunteur,
@@ -443,7 +451,7 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
     const book = currentBooks.find(b => b.id === id)
     if (!book || !book.associationId) return
 
-    const posX = Math.max(0, Math.round((x + SHELF_WIDTH / 2) * 100) / 100)
+    const posX = Math.max(0, Math.round(((x - book.thickness / 2) + SHELF_WIDTH / 2 - 0.25) * 100) / 100)
     try {
       await fetch(`/api/bibliotheques/${bibliothequeId}/livres`, {
         method: 'PATCH',
@@ -460,6 +468,7 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
         height: l.hauteur ?? 2.0,
         coverColor: l.couleur_dos || genreColor(l.genre || 'classique', i),
         shelf: l.etagere ?? 0, order: Math.floor(l.position_x / 0.6) || i,
+        positionX: typeof l.position_x === 'number' ? l.position_x : undefined,
         associationId: l.association_id,
         statut: l.statut || 'present',
         emprunteur: l.emprunteur,
@@ -504,6 +513,7 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
       height: l.hauteur ?? 2.0,
       coverColor: l.couleur_dos || genreColor(l.genre || 'classique', i),
       shelf: l.etagere ?? 0, order: Math.floor(l.position_x / 0.6) || i,
+      positionX: typeof l.position_x === 'number' ? l.position_x : undefined,
       associationId: l.association_id,
       statut: l.statut || 'present',
       emprunteur: l.emprunteur,
