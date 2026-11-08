@@ -108,12 +108,13 @@ export default function Home() {
           />
         )}
 
-        {/* Sidebar bibliothèques */}
-        <aside className={`${
-          sidebarOpen
-            ? 'fixed sm:static inset-y-0 left-0 z-40 w-72 max-w-[85vw] sm:w-56 bg-[#374151]'
-            : 'hidden sm:block sm:w-0 sm:overflow-hidden'
-        } border-r border-[#4f5a73] overflow-y-auto p-3 space-y-2 shrink-0 transition-all`}>
+        {/* Sidebar bibliothèques — slide-in sur mobile, inline sur desktop */}
+        <aside className={`fixed sm:static inset-y-0 left-0 z-50 sm:z-auto w-72 max-w-[85vw] sm:w-56 shrink-0
+          bg-[#374151] border-r border-[#4f5a73] overflow-y-auto p-3 space-y-2
+          transition-transform duration-200 ease-in-out sm:transition-none
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}
+          ${!sidebarOpen ? 'sm:w-0 sm:overflow-hidden sm:p-0' : ''}
+        `}>
           {/* Recherche globale */}
           <div className="mb-4">
             <RechercheGlobale onNavigate={(biblioId) => { setActiveId(biblioId); setAddOpen(false); setSidebarOpen(false) }} />
