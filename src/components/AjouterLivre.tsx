@@ -199,8 +199,8 @@ export default function AjouterLivre({ bibliothequeId, onLivreAjoute, onClose }:
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black/40">
-      <div className="bg-[#374151] rounded-xl shadow-2xl border border-[#4f5a73] w-full max-w-lg mx-4 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-4 sm:pt-20 bg-black/40">
+      <div className="bg-[#374151] rounded-xl shadow-2xl border border-[#4f5a73] w-full max-w-lg mx-3 sm:mx-4 overflow-hidden max-h-[90dvh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-[#4f5a73]">
           <h2 className="text-white font-semibold text-sm">Ajouter un livre</h2>

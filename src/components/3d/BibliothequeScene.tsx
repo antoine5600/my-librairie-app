@@ -308,14 +308,14 @@ function Etageres({ boisEtagere }: { boisEtagere: string }) {
   )
 }
 
-function Livres({ books, onSelectBook, selectedId, draggingId, dragTarget, onDragStart }:
+function Livres({ books, onSelectBook, selectedId, draggingId, dragTarget, onPointerDownBook }:
 {
   books: Book3D[]
   onSelectBook: (id: string) => void
   selectedId: string | null
   draggingId: string | null
   dragTarget: { shelf: number; x: number } | null
-  onDragStart: (id: string) => void
+  onPointerDownBook: (id: string) => void
 }) {
   const booksByShelf: Book3D[][] = Array.from({ length: SHELF_COUNT }, () => [])
   for (const book of books) {
@@ -355,7 +355,7 @@ function Livres({ books, onSelectBook, selectedId, draggingId, dragTarget, onDra
               position={pos}
               selected={book.id === selectedId}
               onSelect={onSelectBook}
-              onDragStart={onDragStart}
+              onPointerDownBook={onPointerDownBook}
               dragging={book.id === draggingId}
             />
           )
@@ -379,7 +379,7 @@ function Livres({ books, onSelectBook, selectedId, draggingId, dragTarget, onDra
             position={[dragTarget.x, baseY, 0.5]}
             selected={false}
             onSelect={() => {}}
-            onDragStart={() => {}}
+            onPointerDownBook={() => {}}
             dragging={true}
           />
         )
@@ -435,11 +435,39 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
 
   // Drag & Drop
   const [dragState, setDragState] = useState<{ id: string; shelf: number; x: number } | null>(null)
+  const [dragCandidate, setDragCandidate] = useState<{ id: string; startX: number; startY: number; shelf: number; x: number } | null>(null)
 
-  const handleDragStart = useCallback((id: string) => {
+  const handleBookPointerDown = useCallback((id: string) => {
     const book = currentBooks.find(b => b.id === id)
-    if (book) setDragState({ id, shelf: book.shelf, x: 0 })
+    if (!book) return
+    setDragCandidate({ id, startX: 0, startY: 0, shelf: book.shelf, x: 0 })
   }, [currentBooks])
+
+  // Détection du drag avec seuil de déplacement (8px)
+  useEffect(() => {
+    if (!dragCandidate) return
+    const handleMove = (e: PointerEvent) => {
+      if (dragCandidate.startX === 0 && dragCandidate.startY === 0) {
+        // Premier move : initialiser la position de départ
+        setDragCandidate(prev => prev ? { ...prev, startX: e.clientX, startY: e.clientY } : null)
+        return
+      }
+      const dx = Math.abs(e.clientX - dragCandidate.startX)
+      const dy = Math.abs(e.clientY - dragCandidate.startY)
+      if (dx + dy > 8) {
+        // Seuil atteint → démarrer le drag
+        setDragState({ id: dragCandidate.id, shelf: dragCandidate.shelf, x: dragCandidate.x })
+        setDragCandidate(null)
+      }
+    }
+    const handleUp = () => setDragCandidate(null)
+    window.addEventListener('pointermove', handleMove)
+    window.addEventListener('pointerup', handleUp)
+    return () => {
+      window.removeEventListener('pointermove', handleMove)
+      window.removeEventListener('pointerup', handleUp)
+    }
+  }, [dragCandidate])
 
   const handleDragMove = useCallback((target: { shelf: number; x: number }) => {
     setDragState(prev => prev ? { ...prev, shelf: target.shelf, x: target.x } : null)
@@ -563,7 +591,7 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
           selectedId={selectedId}
           draggingId={dragState?.id ?? null}
           dragTarget={dragState ? { shelf: dragState.shelf, x: dragState.x } : null}
-          onDragStart={handleDragStart}
+          onPointerDownBook={handleBookPointerDown}
         />
         {dragState && <DragPlane />}
 

@@ -16,7 +16,8 @@ interface Livre3DProps {
   onSelect?: (id: string) => void
   id?: string
   selected?: boolean
-  onDragStart?: (id: string) => void
+  /** Appelé quand l'utilisateur commence à pointer sur le livre (candidat drag) */
+  onPointerDownBook?: (id: string) => void
   dragging?: boolean
 }
 
@@ -69,7 +70,7 @@ export default function Livre3D({
   onSelect,
   id,
   selected = false,
-  onDragStart,
+  onPointerDownBook,
   dragging = false,
 }: Livre3DProps) {
   const [hovered, setHovered] = useState(false)
@@ -81,8 +82,9 @@ export default function Livre3D({
 
   const handlePointerDown = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation()
-    if (onDragStart && id) {
-      onDragStart(id)
+    // Signaler qu'on a cliqué sur ce livre (candidat drag si déplacement > seuil)
+    if (onPointerDownBook && id) {
+      onPointerDownBook(id)
     }
   }
 
