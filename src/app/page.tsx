@@ -111,7 +111,7 @@ export default function Home() {
         {/* Sidebar bibliothèques */}
         <aside className={`${
           sidebarOpen
-            ? 'fixed sm:static inset-y-0 left-0 z-40 w-64 sm:w-56 bg-[#374151]'
+            ? 'fixed sm:static inset-y-0 left-0 z-40 w-72 max-w-[85vw] sm:w-56 bg-[#374151]'
             : 'hidden sm:block sm:w-0 sm:overflow-hidden'
         } border-r border-[#4f5a73] overflow-y-auto p-3 space-y-2 shrink-0 transition-all`}>
           {/* Recherche globale */}

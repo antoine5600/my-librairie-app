@@ -57,7 +57,7 @@ export default function RechercheGlobale({ onNavigate }: RechercheGlobaleProps) 
       )}
 
       {results.length > 0 && (
-        <div className="absolute left-0 right-0 mt-1 max-h-72 overflow-y-auto rounded-lg border border-[#4f5a73] bg-[#1f2937] z-10 shadow-xl">
+        <div className="absolute left-0 right-0 mt-1 max-h-60 sm:max-h-72 overflow-y-auto rounded-lg border border-[#4f5a73] bg-[#1f2937] z-50 shadow-xl">
           {results.map((r) => (
             <div key={r.id} className="px-3 py-2 border-b border-[#4f5a73]/50 last:border-b-0">
               <div className="flex items-start gap-2 min-w-0">
