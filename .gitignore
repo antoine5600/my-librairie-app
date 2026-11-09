@@ -3,6 +3,10 @@
 # dependencies
 /node_modules
 /.pnp
+
+# env
+.env.local
+.env*.local
 .pnp.*
 .yarn/*
 !.yarn/patches

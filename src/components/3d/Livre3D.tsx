@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Vector3 } from 'three'
 import { Text, Html } from '@react-three/drei'
 import { ThreeEvent } from '@react-three/fiber'
@@ -74,17 +74,24 @@ export default function Livre3D({
   dragging = false,
 }: Livre3DProps) {
   const [hovered, setHovered] = useState(false)
-
-  const handleClick = (e: ThreeEvent<MouseEvent>) => {
-    e.stopPropagation()
-    if (onSelect && id) onSelect(id)
-  }
+  const pointerStart = useRef<{ x: number; y: number } | null>(null)
 
   const handlePointerDown = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation()
-    // Signaler qu'on a cliqué sur ce livre (candidat drag si déplacement > seuil)
-    if (onPointerDownBook && id) {
-      onPointerDownBook(id)
+    pointerStart.current = { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY }
+    if (onPointerDownBook && id) onPointerDownBook(id)
+  }
+
+  const handlePointerUp = (e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation()
+    // Si le pointeur n'a pas bougé (pas un drag) → c'est un clic → sélection
+    if (pointerStart.current) {
+      const dx = Math.abs(e.nativeEvent.clientX - pointerStart.current.x)
+      const dy = Math.abs(e.nativeEvent.clientY - pointerStart.current.y)
+      pointerStart.current = null
+      if (dx + dy < 8 && onSelect && id) {
+        onSelect(id)
+      }
     }
   }
 
@@ -100,8 +107,8 @@ export default function Livre3D({
       position={position}
       onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
       onPointerOut={() => setHovered(false)}
-      onClick={handleClick}
       onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
     >
       {/* Corps principal — dos du livre */}
       <mesh position={[0, height / 2, 0]} castShadow receiveShadow>
