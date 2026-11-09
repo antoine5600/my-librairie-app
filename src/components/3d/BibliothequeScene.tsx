@@ -431,7 +431,9 @@ export default function BibliothequeScene({ className, bibliothequeId, ambianceI
       .finally(() => setLoading(false))
   }, [bibliothequeId])
 
-  const currentBooks = books.length > 0 ? books.filter((b) => !b.statut || b.statut === 'present') : SAMPLE_BOOKS
+  const currentBooks = bibliothequeId
+    ? books.filter((b) => !b.statut || b.statut === 'present')
+    : (books.length > 0 ? books.filter((b) => !b.statut || b.statut === 'present') : SAMPLE_BOOKS)
 
   // Drag & Drop
   const [dragState, setDragState] = useState<{ id: string; shelf: number; x: number } | null>(null)
